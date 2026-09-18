@@ -10,6 +10,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const lockPath = path.join(__dirname, '..', '.bot.lock');
+const skipLock = ['1', 'true', 'yes', 'on'].includes(
+  String(process.env.SKIP_BOT_LOCK || '').toLowerCase(),
+);
+if (!skipLock) {
 try {
   if (fs.existsSync(lockPath)) {
     const oldPid = Number(fs.readFileSync(lockPath, 'utf8').trim());
@@ -45,6 +49,7 @@ try {
 } catch (error) {
   console.warn('Не удалось создать lock-файл:', error.message);
 }
+}
 
 const { registerAuditLogs } = require('./logging/registerAuditLogs');
 const { registerUserInfoChannel } = require('./features/userInfoChannel');
@@ -72,14 +77,17 @@ const { isAllowedSelfRole } = require('./utils/selfroles');
 const token = process.env.DISCORD_TOKEN;
 
 if (!isSafeToken(token)) {
-  console.error('Некорректный DISCORD_TOKEN в .env — бот не запущен.');
+  console.error('[boot] Некорректный или пустой DISCORD_TOKEN (проверь Environment Variables на хостинге).');
   process.exit(1);
 }
 
-if (!allowedGuildIds().length) {
-  console.error('Укажи GUILD_ID (или ALLOWED_GUILD_IDS) в .env — иначе бот нигде не работает.');
+const guilds = allowedGuildIds();
+if (!guilds.length) {
+  console.error('[boot] Нет GUILD_ID / ALLOWED_GUILD_IDS в env — бот не запущен.');
   process.exit(1);
 }
+
+console.log('[boot] env ok · guilds:', guilds.join(', '));
 
 const client = new Client({
   intents: [
