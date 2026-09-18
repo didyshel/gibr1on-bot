@@ -1,0 +1,19 @@
+{
+  "name": "gibr1on-bot",
+  "version": "1.0.0",
+  "description": "Personal Discord bot for gibr1on",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "restart": "node scripts/restart-bot.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "dotenv": "^18.0.0"
+  }
+}
