@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 
 /** Фиолетовый неон · минимализм */
@@ -68,10 +69,10 @@ function errorReply(description, extra = {}) {
     embeds: [
       errorEmbed({
         title: extra.title || 'ошибка',
-        description,
+        description: String(description || 'ошибка').slice(0, 2000),
       }),
     ],
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   };
 }
 

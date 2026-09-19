@@ -53,10 +53,12 @@ function registerWelcome(client) {
             guildName: member.guild.name,
             memberCount: member.guild.memberCount,
           });
-          const file = new AttachmentBuilder(buffer, { name: 'welcome.png' });
-          embed.setImage('attachment://welcome.png');
-          payload.files = [file];
-          payload.embeds = [embed];
+          if (buffer) {
+            const file = new AttachmentBuilder(buffer, { name: 'welcome.png' });
+            embed.setImage('attachment://welcome.png');
+            payload.files = [file];
+            payload.embeds = [embed];
+          }
         } catch (err) {
           console.warn('welcome card:', err.message);
         }
