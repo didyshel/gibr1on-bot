@@ -7,14 +7,17 @@
   "scripts": {
     "start": "node src/index.js",
     "restart": "node scripts/restart-bot.js",
-    "deploy": "node src/deploy-commands.js"
+    "deploy": "node src/deploy-commands.js",
+    "postinstall": "node -e \"try{require('@napi-rs/canvas');console.log('canvas ok')}catch(e){console.warn('canvas skip:',e.message)}\""
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.9",
     "discord.js": "^14.27.0",
     "dotenv": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas": "^1.0.9"
   }
 }

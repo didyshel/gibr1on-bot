@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: false });
 const {
   Client,
   Collection,
@@ -172,6 +172,26 @@ async function safeRespond(interaction, payload) {
   }
 }
 
+/** После defer: команды с reply()/deferReply() продолжают работать через editReply */
+function patchDeferredInteraction(interaction) {
+  const edit = interaction.editReply.bind(interaction);
+  const followUp = interaction.followUp.bind(interaction);
+
+  interaction.reply = async (options = {}) => {
+    const { ephemeral, fetchReply, flags, ...rest } = options;
+    const result = await edit(rest);
+    if (fetchReply) {
+      return interaction.fetchReply();
+    }
+    return result;
+  };
+
+  interaction.deferReply = async () => interaction;
+
+  interaction.followUp = followUp;
+  return interaction;
+}
+
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`[boot] онлайн как ${readyClient.user.tag}`);
   console.log(`[boot] ws status: ${readyClient.ws.status}`);
@@ -221,26 +241,33 @@ client.on(Events.GuildCreate, async (guild) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  const label = interaction.commandName || interaction.customId || interaction.type;
-  console.log(`[interaction] in · ${label}`);
-
   try {
     if (interaction.isChatInputCommand()) {
+      // ACK сразу — на FadeHost 256MB иначе успевает истечь 3с
+      try {
+        await interaction.deferReply();
+      } catch (error) {
+        console.error('[interaction] defer fail:', error.message);
+        return;
+      }
+
+      console.log(`[interaction] in · /${interaction.commandName}`);
+      patchDeferredInteraction(interaction);
+
       const command = client.commands.get(interaction.commandName);
       if (!command) {
         console.warn(`[interaction] нет хендлера: /${interaction.commandName}`);
-        await safeRespond(
-          interaction,
-          errorReply(
-            `команда \`/${interaction.commandName}\` не загружена · restart FadeHost + npm run deploy`,
-          ),
-        );
+        await interaction.editReply({
+          embeds: errorReply(
+            `команда \`/${interaction.commandName}\` не загружена · Redeploy на FadeHost`,
+          ).embeds,
+        });
         return;
       }
 
       const access = assertInteractionAccess(interaction, command);
       if (!access.ok) {
-        await safeRespond(interaction, errorReply(access.reason));
+        await interaction.editReply({ embeds: errorReply(access.reason).embeds });
         return;
       }
 
@@ -248,6 +275,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
       console.log(`[interaction] ok · /${interaction.commandName}`);
       return;
     }
+
+    const label = interaction.customId || interaction.type;
+    console.log(`[interaction] in · ${label}`);
 
     const tvId = interaction.customId || '';
     if (
@@ -355,7 +385,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   } catch (error) {
     console.error('[interaction] error:', error);
-    await safeRespond(interaction, errorReply('ошибка при выполнении')).catch(() => null);
+    try {
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ embeds: errorReply('ошибка при выполнении').embeds }).catch(() => null);
+      } else {
+        await safeRespond(interaction, errorReply('ошибка при выполнении'));
+      }
+    } catch {
+      /* ignore */
+    }
   }
 });
 
