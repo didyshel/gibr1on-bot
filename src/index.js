@@ -93,8 +93,25 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
   partials: [Partials.GuildMember, Partials.Message, Partials.Channel],
+  rest: {
+    timeout: 7_000,
+    retries: 2,
+  },
 });
 client.setMaxListeners(30);
+
+// Heartbeat — видно, жив ли event loop на FadeHost после boot
+client.once(Events.ClientReady, () => {
+  setInterval(() => {
+    try {
+      console.log(
+        `[alive] ws=${client.ws.status} ping=${Math.round(client.ws.ping || 0)}ms cmds=${client.commands.size}`,
+      );
+    } catch {
+      /* ignore */
+    }
+  }, 30_000);
+});
 
 client.commands = new Collection();
 
@@ -241,17 +258,24 @@ client.on(Events.GuildCreate, async (guild) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  const name = interaction.commandName || interaction.customId || String(interaction.type);
+  // Синхронно ДО любого await — иначе на FadeHost не видно, что event дошёл
+  console.log(`[interaction] hit · ${name}`);
+
   try {
     if (interaction.isChatInputCommand()) {
-      // ACK сразу — на FadeHost 256MB иначе успевает истечь 3с
+      const t0 = Date.now();
       try {
         await interaction.deferReply();
+        console.log(`[interaction] deferred · /${interaction.commandName} · ${Date.now() - t0}ms`);
       } catch (error) {
-        console.error('[interaction] defer fail:', error.message);
+        console.error(
+          `[interaction] defer fail · /${interaction.commandName} · ${Date.now() - t0}ms ·`,
+          error.message,
+        );
         return;
       }
 
-      console.log(`[interaction] in · /${interaction.commandName}`);
       patchDeferredInteraction(interaction);
 
       const command = client.commands.get(interaction.commandName);
