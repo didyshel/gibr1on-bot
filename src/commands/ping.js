@@ -6,18 +6,23 @@ module.exports = {
     .setName('ping')
     .setDescription('Проверка, что бот отвечает'),
   async execute(interaction) {
-    const sent = await interaction.reply({
+    const ws = Math.round(interaction.client.ws.ping || 0);
+    const started = Date.now();
+
+    await interaction.reply({
       embeds: [
         infoEmbed({
           title: 'ping',
-          description: '…',
+          color: BRAND.glow,
+          fields: [
+            { name: 'ws', value: `\`${ws}ms\``, inline: true },
+            { name: 'ответ', value: '`…`', inline: true },
+          ],
         }),
       ],
-      fetchReply: true,
     });
 
-    const latency = sent.createdTimestamp - interaction.createdTimestamp;
-    const api = Math.round(interaction.client.ws.ping);
+    const roundtrip = Date.now() - started;
 
     await interaction.editReply({
       embeds: [
@@ -25,8 +30,8 @@ module.exports = {
           title: 'ping',
           color: BRAND.glow,
           fields: [
-            { name: 'ответ', value: `\`${latency}ms\``, inline: true },
-            { name: 'ws', value: `\`${api}ms\``, inline: true },
+            { name: 'ws', value: `\`${ws}ms\``, inline: true },
+            { name: 'ответ', value: `\`${roundtrip}ms\``, inline: true },
           ],
         }),
       ],

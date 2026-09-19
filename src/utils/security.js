@@ -22,6 +22,18 @@ const DANGEROUS_ROLE_PERMS =
 
 const rateBuckets = new Map();
 
+/** Команды, доступные всем (активность / утилиты). Ролевой гейт на них не действует. */
+const PUBLIC_COMMANDS = new Set([
+  'ping',
+  'help',
+  'level',
+  'leaderboard',
+  'remind',
+  'bday',
+  'server',
+  'activity',
+]);
+
 function envList(name) {
   const raw = process.env[name];
   if (!raw || /your_|_here|вставь/i.test(raw)) return [];
@@ -143,8 +155,18 @@ function assertInteractionAccess(interaction, command = null) {
 
   if (interaction.guild?.ownerId === interaction.user.id) return { ok: true };
 
+  const cmdName = command?.data?.name || interaction.commandName || null;
+  const customId = interaction.customId || '';
+  const isPublicCmd = cmdName && PUBLIC_COMMANDS.has(cmdName);
+  const isPublicUi =
+    customId.startsWith('help:') ||
+    customId.startsWith('selfrole:') ||
+    customId.startsWith('tv:') ||
+    customId.startsWith('tvmodal:') ||
+    customId.startsWith('tvselect:');
+
   const roleGate = allowedRoleIds();
-  if (roleGate.length && !memberHasAllowedRole(interaction.member)) {
+  if (roleGate.length && !isPublicCmd && !isPublicUi && !memberHasAllowedRole(interaction.member)) {
     return { ok: false, reason: 'нужна разрешённая роль' };
   }
 
@@ -160,6 +182,7 @@ function assertInteractionAccess(interaction, command = null) {
 
 module.exports = {
   DANGEROUS_ROLE_PERMS,
+  PUBLIC_COMMANDS,
   allowedGuildIds,
   allowedRoleIds,
   ownerIds,

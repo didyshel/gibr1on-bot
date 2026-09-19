@@ -55,12 +55,17 @@ function levelFromXp(xp) {
 
 function getUser(guildId, userId, { create = true } = {}) {
   const data = ensure();
-  if (!data[guildId]) data[guildId] = {};
-  if (!data[guildId][userId]) {
+  const gid = String(guildId);
+  const uid = String(userId);
+  if (!data[gid]) {
     if (!create) return { xp: 0, messages: 0, voiceMinutes: 0 };
-    data[guildId][userId] = { xp: 0, messages: 0, voiceMinutes: 0 };
+    data[gid] = {};
   }
-  return data[guildId][userId];
+  if (!data[gid][uid]) {
+    if (!create) return { xp: 0, messages: 0, voiceMinutes: 0 };
+    data[gid][uid] = { xp: 0, messages: 0, voiceMinutes: 0 };
+  }
+  return data[gid][uid];
 }
 
 function getLevelRoles(guildId) {
