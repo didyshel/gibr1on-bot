@@ -42,6 +42,11 @@ function ownerIds() {
   return envList('OWNER_IDS');
 }
 
+/** Роли, которым разрешено пользоваться ботом. Пусто = без ограничения по ролям */
+function allowedRoleIds() {
+  return envList('ALLOWED_ROLE_IDS');
+}
+
 function leaveUnknownGuilds() {
   const value = process.env.LEAVE_UNKNOWN_GUILDS;
   if (value == null || value === '') return true;
@@ -56,6 +61,29 @@ function isAllowedGuild(guildId) {
 
 function isOwner(userId) {
   return ownerIds().includes(String(userId));
+}
+
+function memberHasAllowedRole(member) {
+  const roles = allowedRoleIds();
+  if (!roles.length) return true;
+  if (!member) return false;
+
+  // GuildMember: roles.cache
+  if (member.roles?.cache?.has) {
+    return roles.some((id) => member.roles.cache.has(id));
+  }
+
+  // APIInteractionGuildMember: roles = string[]
+  if (Array.isArray(member.roles)) {
+    return roles.some((id) => member.roles.includes(id));
+  }
+
+  // иногда _roles
+  if (Array.isArray(member._roles)) {
+    return roles.some((id) => member._roles.includes(id));
+  }
+
+  return false;
 }
 
 function isSafeToken(token) {
@@ -100,7 +128,7 @@ function requiredPermissions(command) {
  * @returns {{ ok: true } | { ok: false, reason: string }}
  */
 function assertInteractionAccess(interaction, command = null) {
-  if (!interaction.guildId || !interaction.inGuild?.()) {
+  if (!interaction.guildId) {
     return { ok: false, reason: 'только на сервере' };
   }
 
@@ -112,6 +140,13 @@ function assertInteractionAccess(interaction, command = null) {
   if (!rate.ok) return rate;
 
   if (isOwner(interaction.user.id)) return { ok: true };
+
+  if (interaction.guild?.ownerId === interaction.user.id) return { ok: true };
+
+  const roleGate = allowedRoleIds();
+  if (roleGate.length && !memberHasAllowedRole(interaction.member)) {
+    return { ok: false, reason: 'нужна разрешённая роль' };
+  }
 
   if (command) {
     const need = requiredPermissions(command);
@@ -126,10 +161,12 @@ function assertInteractionAccess(interaction, command = null) {
 module.exports = {
   DANGEROUS_ROLE_PERMS,
   allowedGuildIds,
+  allowedRoleIds,
   ownerIds,
   leaveUnknownGuilds,
   isAllowedGuild,
   isOwner,
+  memberHasAllowedRole,
   isSafeToken,
   isDangerousRole,
   checkRateLimit,

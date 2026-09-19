@@ -1,7 +1,9 @@
-const { Events } = require('discord.js');
-const { welcomeChannelId, autoRoleId } = require('../utils/config');
+const { Events, AttachmentBuilder } = require('discord.js');
+const { welcomeChannelId, autoRoleId, welcomeCard } = require('../utils/config');
 const { brandEmbed, BRAND } = require('../utils/style');
 const { isAllowedGuild } = require('../utils/security');
+const { renderWelcomeCard } = require('../utils/welcomeCard');
+const { markAction } = require('../utils/logger');
 
 function registerWelcome(client) {
   client.on(Events.GuildMemberAdd, async (member) => {
@@ -9,6 +11,7 @@ function registerWelcome(client) {
       if (!isAllowedGuild(member.guild.id)) return;
       const roleId = autoRoleId();
       if (roleId) {
+        markAction(`roles:${member.guild.id}:${member.id}`);
         await member.roles.add(roleId).catch((err) => {
           console.warn('Не удалось выдать автороль:', err.message);
         });
@@ -39,7 +42,27 @@ function registerWelcome(client) {
         footer: `id · ${member.id}`,
       });
 
-      await channel.send({ content: `${member}`, embeds: [embed] });
+      const payload = { content: `${member}`, embeds: [embed] };
+
+      if (welcomeCard()) {
+        try {
+          const buffer = await renderWelcomeCard({
+            displayName: member.displayName,
+            username: member.user.username,
+            avatarURL: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            guildName: member.guild.name,
+            memberCount: member.guild.memberCount,
+          });
+          const file = new AttachmentBuilder(buffer, { name: 'welcome.png' });
+          embed.setImage('attachment://welcome.png');
+          payload.files = [file];
+          payload.embeds = [embed];
+        } catch (err) {
+          console.warn('welcome card:', err.message);
+        }
+      }
+
+      await channel.send(payload);
     } catch (error) {
       console.error('Ошибка приветствия:', error);
     }

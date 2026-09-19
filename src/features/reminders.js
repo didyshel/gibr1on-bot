@@ -19,6 +19,24 @@ function addReminder(reminder) {
   return reminder;
 }
 
+function listReminders(userId, guildId) {
+  const data = load();
+  return data.items
+    .filter((item) => item.userId === String(userId) && item.guildId === String(guildId))
+    .sort((a, b) => a.at - b.at);
+}
+
+function cancelReminder(userId, reminderId) {
+  const data = load();
+  const idx = data.items.findIndex(
+    (item) => item.id === String(reminderId) && item.userId === String(userId),
+  );
+  if (idx === -1) return null;
+  const [removed] = data.items.splice(idx, 1);
+  save(data);
+  return removed;
+}
+
 function registerReminders(client) {
   const tick = async () => {
     const data = load();
@@ -69,4 +87,10 @@ function parseDuration(input) {
   return ms;
 }
 
-module.exports = { registerReminders, addReminder, parseDuration };
+module.exports = {
+  registerReminders,
+  addReminder,
+  listReminders,
+  cancelReminder,
+  parseDuration,
+};

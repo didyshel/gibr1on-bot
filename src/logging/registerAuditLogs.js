@@ -248,21 +248,27 @@ function registerAuditLogs(client) {
             ],
           });
         } else if (oldCh && newCh && oldCh.id !== newCh.id) {
-          const mover = await findAuditExecutor(guild, AuditLogEvent.MemberMove, member.id);
-          const fields = [
-            { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
-            { name: 'Откуда', value: channelLabel(oldCh), inline: true },
-            { name: 'Куда', value: channelLabel(newCh), inline: true },
-          ];
-          if (mover && mover.id !== member.id) {
-            fields.push({ name: 'Переместил', value: `${mover} (\`${mover.tag}\`)` });
+          if (consumeAction(`voicemove:${guild.id}:${member.id}`)) {
+            // temp voice / afk / moveall уже залогировали или не нужны
+          } else {
+            const mover = await findAuditExecutor(guild, AuditLogEvent.MemberMove, member.id);
+            if (!(mover && botId() && mover.id === botId())) {
+              const fields = [
+                { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+                { name: 'Откуда', value: channelLabel(oldCh), inline: true },
+                { name: 'Куда', value: channelLabel(newCh), inline: true },
+              ];
+              if (mover && mover.id !== member.id) {
+                fields.push({ name: 'Переместил', value: `${mover} (\`${mover.tag}\`)` });
+              }
+              await sendServerLog(guild, {
+                category: 'member',
+                title: 'Войс: перемещение',
+                color: BRAND.warn,
+                fields,
+              });
+            }
           }
-          await sendServerLog(guild, {
-            category: 'member',
-            title: 'Войс: перемещение',
-            color: BRAND.warn,
-            fields,
-          });
         }
       }
 
@@ -276,6 +282,8 @@ function registerAuditLogs(client) {
 
       if (voiceFlags.length) {
         const executor = await findAuditExecutor(guild, AuditLogEvent.MemberUpdate, member.id);
+        if (executor && botId() && executor.id === botId()) return;
+
         const fields = [
           { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
           { name: 'Канал', value: channelLabel(newCh || oldCh), inline: true },
@@ -384,34 +392,47 @@ function registerAuditLogs(client) {
       const removed = oldMember.roles.cache.filter((r) => !newMember.roles.cache.has(r.id) && r.id !== newMember.guild.id);
 
       if (added.size || removed.size) {
-        const executor = await findAuditExecutor(
-          newMember.guild,
-          AuditLogEvent.MemberRoleUpdate,
-          newMember.id,
-        );
-        const fields = [
-          { name: 'Участник', value: `${newMember} (\`${newMember.user.tag}\`)` },
-        ];
-        if (added.size) {
-          fields.push({ name: 'Выданы', value: truncate([...added.values()].map((r) => `${r}`).join(', ')) });
+        if (consumeAction(`roles:${newMember.guild.id}:${newMember.id}`)) {
+          // автороль / level / self-role — без дубля
+        } else {
+          const executor = await findAuditExecutor(
+            newMember.guild,
+            AuditLogEvent.MemberRoleUpdate,
+            newMember.id,
+          );
+          // Роли, которые выдал сам бот, уже отражены в других логах/командах
+          if (!(executor && botId() && executor.id === botId())) {
+            const fields = [
+              { name: 'Участник', value: `${newMember} (\`${newMember.user.tag}\`)` },
+            ];
+            if (added.size) {
+              fields.push({
+                name: 'Выданы',
+                value: truncate([...added.values()].map((r) => `${r}`).join(', ')),
+              });
+            }
+            if (removed.size) {
+              fields.push({
+                name: 'Сняты',
+                value: truncate([...removed.values()].map((r) => `${r}`).join(', ')),
+              });
+            }
+            if (executor) {
+              fields.push({ name: 'Кто изменил', value: `${executor} (\`${executor.tag}\`)` });
+            }
+            await sendServerLog(newMember.guild, {
+              category: 'role',
+              title: 'Роли участника изменены',
+              color: BRAND.soft,
+              fields,
+              footer: `ID: ${newMember.id}`,
+            });
+          }
         }
-        if (removed.size) {
-          fields.push({ name: 'Сняты', value: truncate([...removed.values()].map((r) => `${r}`).join(', ')) });
-        }
-        if (executor) {
-          fields.push({ name: 'Кто изменил', value: `${executor} (\`${executor.tag}\`)` });
-        }
-        await sendServerLog(newMember.guild, {
-          category: 'role',
-          title: 'Роли участника изменены',
-          color: BRAND.soft,
-          fields,
-          footer: `ID: ${newMember.id}`,
-        });
       }
 
       if (oldMember.communicationDisabledUntilTimestamp !== newMember.communicationDisabledUntilTimestamp) {
-        // /timeout и автомод уже залогировали
+        // автомод уже залогировал
         if (consumeAction(`timeout:${newMember.guild.id}:${newMember.id}`)) return;
 
         const executor = await findAuditExecutor(
@@ -447,7 +468,8 @@ function registerAuditLogs(client) {
 
   client.on(Events.GuildBanAdd, async (ban) => {
     try {
-      if (consumeAction(`ban:${ban.guild.id}:${ban.user.id}`)) return;
+      // softban уже написал mod-лог
+      if (consumeAction(`modlog:ban:${ban.guild.id}:${ban.user.id}`)) return;
 
       const entry = await findAuditEntry(ban.guild, AuditLogEvent.MemberBanAdd, ban.user.id);
       const executor = entry?.executor ?? null;
@@ -471,7 +493,12 @@ function registerAuditLogs(client) {
 
   client.on(Events.GuildBanRemove, async (ban) => {
     try {
+      if (consumeAction(`modlog:unban:${ban.guild.id}:${ban.user.id}`)) return;
+      if (hasAction(`modlog:ban:${ban.guild.id}:${ban.user.id}`)) return;
+      if (hasAction(`ban:${ban.guild.id}:${ban.user.id}`)) return;
+
       const executor = await findAuditExecutor(ban.guild, AuditLogEvent.MemberBanRemove, ban.user.id);
+
       await sendServerLog(ban.guild, {
         category: 'member',
         title: 'Разбан',

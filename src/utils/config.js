@@ -10,6 +10,13 @@ function envFlag(name, defaultValue = false) {
   return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
 }
 
+function envInt(name, defaultValue) {
+  const value = process.env[name];
+  if (value == null || value === '') return defaultValue;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : defaultValue;
+}
+
 function envList(name) {
   const raw = process.env[name];
   if (!raw || /your_|_here|вставь/i.test(raw)) return [];
@@ -51,6 +58,7 @@ function isLogChannelId(channelId) {
 
 module.exports = {
   welcomeChannelId: () => env('WELCOME_CHANNEL_ID'),
+  welcomeCard: () => envFlag('WELCOME_CARD', true),
   autoRoleId: () => env('AUTO_ROLE_ID'),
   /** @deprecated use member/role/server/message log channel helpers */
   logChannelId: () => env('LOG_CHANNEL_ID'),
@@ -68,6 +76,29 @@ module.exports = {
   birthdayChannelId: () => env('BIRTHDAY_CHANNEL_ID') || env('WELCOME_CHANNEL_ID'),
   automodInvites: () => envFlag('AUTOMOD_INVITES', true),
   automodSpam: () => envFlag('AUTOMOD_SPAM', true),
+  automodWords: () => envFlag('AUTOMOD_WORDS', true),
+  automodCaps: () => envFlag('AUTOMOD_CAPS', true),
+  automodLinks: () => envFlag('AUTOMOD_LINKS', true),
+  automodRaid: () => envFlag('AUTOMOD_RAID', true),
+  automodCapsPercent: () => envInt('AUTOMOD_CAPS_PERCENT', 70),
+  automodCapsMinLen: () => envInt('AUTOMOD_CAPS_MIN_LEN', 8),
+  automodLinksMax: () => envInt('AUTOMOD_LINKS_MAX', 3),
+  automodRaidJoins: () => envInt('AUTOMOD_RAID_JOINS', 5),
+  automodRaidWindowSec: () => envInt('AUTOMOD_RAID_WINDOW_SEC', 10),
+  afkDetect: () => envFlag('AFK_DETECT', true),
+  afkMinutes: () => envInt('AFK_MINUTES', 10),
+  afkChannelId: () => env('AFK_CHANNEL_ID'),
+  levelMessageXp: () => envFlag('LEVEL_MESSAGE_XP', true),
+  levelVoiceXp: () => envFlag('LEVEL_VOICE_XP', true),
+  /** XP за каждую минуту в войсе (с кем-то, не AFK) */
+  levelVoiceXpAmount: () => envInt('LEVEL_VOICE_XP_AMOUNT', 5),
+  backupEnabled: () => envFlag('BACKUP_ENABLED', true),
+  backupKeepDays: () => envInt('BACKUP_KEEP_DAYS', 7),
+  /** После N варнов — timeout (0 = выкл) */
+  warnTimeoutAt: () => envInt('WARN_TIMEOUT_AT', 3),
+  warnTimeoutMinutes: () => envInt('WARN_TIMEOUT_MINUTES', 60),
+  /** После N варнов — kick (0 = выкл). Имеет приоритет над timeout на том же пороге */
+  warnKickAt: () => envInt('WARN_KICK_AT', 5),
   guildId: () => env('GUILD_ID'),
   ownerIds: () => envList('OWNER_IDS'),
   allowedGuildIds: () => {

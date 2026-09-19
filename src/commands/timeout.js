@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { canModerate } = require('../utils/moderation');
-const { sendModLog, markAction } = require('../utils/logger');
 const { successEmbed, warnEmbed, errorReply, BRAND } = require('../utils/style');
+const { createCase, formatCaseId } = require('../utils/cases');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -39,10 +39,18 @@ module.exports = {
       return interaction.reply(errorReply(check.reason));
     }
 
-    markAction(`timeout:${interaction.guild.id}:${targetUser.id}`);
+    const caseEntry = createCase(interaction.guild.id, {
+      type: minutes === 0 ? 'untimeout' : 'timeout',
+      userId: targetUser.id,
+      moderatorId: interaction.user.id,
+      reason,
+      meta: { minutes },
+    });
+    const caseLabel = formatCaseId(caseEntry.id);
+    const auditReason = `${caseLabel} · ${reason} · by ${interaction.user.tag}`;
 
     if (minutes === 0) {
-      await target.timeout(null, reason);
+      await target.timeout(null, auditReason);
       await interaction.reply({
         embeds: [
           successEmbed({
@@ -54,25 +62,16 @@ module.exports = {
             },
             fields: [
               { name: 'участник', value: `${targetUser}`, inline: true },
+              { name: 'case', value: `\`${caseLabel}\``, inline: true },
               { name: 'причина', value: reason },
             ],
           }),
         ],
       });
-      await sendModLog(interaction.guild, {
-        title: 'timeout · снят',
-        color: BRAND.success,
-        fields: [
-          { name: 'участник', value: `${targetUser} (\`${targetUser.tag}\`)` },
-          { name: 'модератор', value: `${interaction.user}` },
-          { name: 'причина', value: reason },
-        ],
-        footer: `id · ${targetUser.id}`,
-      });
       return;
     }
 
-    await target.timeout(minutes * 60 * 1000, reason);
+    await target.timeout(minutes * 60 * 1000, auditReason);
     await interaction.reply({
       embeds: [
         warnEmbed({
@@ -85,22 +84,11 @@ module.exports = {
           fields: [
             { name: 'участник', value: `${targetUser}`, inline: true },
             { name: 'длительность', value: `\`${minutes} мин\``, inline: true },
+            { name: 'case', value: `\`${caseLabel}\``, inline: true },
             { name: 'причина', value: reason },
           ],
         }),
       ],
-    });
-
-    await sendModLog(interaction.guild, {
-      title: 'timeout',
-      color: BRAND.warn,
-      fields: [
-        { name: 'участник', value: `${targetUser} (\`${targetUser.tag}\`)` },
-        { name: 'модератор', value: `${interaction.user}` },
-        { name: 'длительность', value: `${minutes} мин` },
-        { name: 'причина', value: reason },
-      ],
-      footer: `id · ${targetUser.id}`,
     });
   },
 };

@@ -1,48 +1,63 @@
-const fs = require('node:fs');
-const path = require('node:path');
+const { readJson, writeJson } = require('./store');
 
-const filePath = path.join(__dirname, '..', 'data', 'warns.json');
-
-function ensureFile() {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '{}', 'utf8');
-}
-
-function readAll() {
-  ensureFile();
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return {};
-  }
-}
-
-function writeAll(data) {
-  ensureFile();
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-}
+const FILE = 'warns.json';
 
 function getWarns(guildId, userId) {
-  const data = readAll();
+  const data = readJson(FILE, {});
   return data[guildId]?.[userId] || [];
 }
 
 function addWarn(guildId, userId, warn) {
-  const data = readAll();
+  const data = readJson(FILE, {});
   if (!data[guildId]) data[guildId] = {};
   if (!data[guildId][userId]) data[guildId][userId] = [];
   data[guildId][userId].push(warn);
-  writeAll(data);
+  writeJson(FILE, data);
   return data[guildId][userId];
 }
 
+function removeWarn(guildId, userId, index1Based) {
+  const data = readJson(FILE, {});
+  const list = data[guildId]?.[userId];
+  if (!list?.length) return { ok: false, reason: 'нет варнов' };
+
+  const idx = Number(index1Based) - 1;
+  if (!Number.isInteger(idx) || idx < 0 || idx >= list.length) {
+    return { ok: false, reason: `номер от 1 до ${list.length}` };
+  }
+
+  const [removed] = list.splice(idx, 1);
+  if (!list.length) delete data[guildId][userId];
+  writeJson(FILE, data);
+  return { ok: true, removed, remaining: list.length };
+}
+
+function removeWarnByCaseId(guildId, userId, caseId) {
+  const data = readJson(FILE, {});
+  const list = data[guildId]?.[userId];
+  if (!list?.length) return false;
+
+  const next = list.filter((w) => w.caseId !== caseId);
+  if (next.length === list.length) return false;
+
+  if (!next.length) delete data[guildId][userId];
+  else data[guildId][userId] = next;
+  writeJson(FILE, data);
+  return true;
+}
+
 function clearWarns(guildId, userId) {
-  const data = readAll();
+  const data = readJson(FILE, {});
   if (data[guildId]) {
     delete data[guildId][userId];
-    writeAll(data);
+    writeJson(FILE, data);
   }
 }
 
-module.exports = { getWarns, addWarn, clearWarns };
+module.exports = {
+  getWarns,
+  addWarn,
+  removeWarn,
+  removeWarnByCaseId,
+  clearWarns,
+};

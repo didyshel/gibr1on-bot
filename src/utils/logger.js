@@ -17,8 +17,10 @@ const LOG_CATEGORIES = {
 
 /** @type {Map<string, number>} */
 const actionUntil = new Map();
+/** @type {Map<string, number>} */
+const recentFingerprints = new Map();
 
-function markAction(key, ttlMs = 8000) {
+function markAction(key, ttlMs = 15_000) {
   actionUntil.set(key, Date.now() + ttlMs);
 }
 
@@ -61,10 +63,38 @@ async function getLogChannel(guild, category = 'server') {
   return channel;
 }
 
+function fingerprint(guildId, category, title, footer, fields) {
+  const body = (fields || [])
+    .map((f) => `${f.name}=${f.value}`)
+    .join('|')
+    .slice(0, 240);
+  return `${guildId}:${category}:${title}:${footer || ''}:${body}`;
+}
+
+function isDuplicateLog(guildId, category, title, footer, fields, windowMs = 4000) {
+  const key = fingerprint(guildId, category, title, footer, fields);
+  const now = Date.now();
+  const prev = recentFingerprints.get(key);
+  if (prev && now - prev < windowMs) return true;
+  recentFingerprints.set(key, now);
+  if (recentFingerprints.size > 500) {
+    for (const [k, ts] of recentFingerprints) {
+      if (now - ts > windowMs) recentFingerprints.delete(k);
+    }
+  }
+  return false;
+}
+
 async function sendServerLog(
   guild,
   { title, description, color = BRAND.color, fields = [], footer, category = 'server' } = {},
 ) {
+  if (!guild) return false;
+
+  if (isDuplicateLog(guild.id, category, title, footer, fields)) {
+    return false;
+  }
+
   const channel = await getLogChannel(guild, category);
   if (!channel) return false;
 

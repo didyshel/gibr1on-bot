@@ -10,10 +10,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const lockPath = path.join(__dirname, '..', '.bot.lock');
-const skipLock = ['1', 'true', 'yes', 'on'].includes(
-  String(process.env.SKIP_BOT_LOCK || '').toLowerCase(),
+// По умолчанию lock выключен (хостинг). Включи локально: ENABLE_BOT_LOCK=true
+const enableLock = ['1', 'true', 'yes', 'on'].includes(
+  String(process.env.ENABLE_BOT_LOCK || '').toLowerCase(),
 );
-if (!skipLock) {
+if (enableLock) {
 try {
   if (fs.existsSync(lockPath)) {
     const oldPid = Number(fs.readFileSync(lockPath, 'utf8').trim());
@@ -56,12 +57,15 @@ const { registerUserInfoChannel } = require('./features/userInfoChannel');
 const { registerPresence } = require('./features/presence');
 const { registerWelcome } = require('./features/welcome');
 const { registerEasterEggs } = require('./features/easterEggs');
-const { registerTempVoice } = require('./features/tempVoice');
+const { registerTempVoice, handleTempVoiceInteraction } = require('./features/tempVoice');
 const { registerReminders } = require('./features/reminders');
 const { registerBirthdays } = require('./features/birthdays');
 const { registerActivity } = require('./features/activity');
 const { registerStats } = require('./features/stats');
 const { registerAutomod } = require('./features/automod');
+const { registerLevels } = require('./features/levels');
+const { registerAfkDetect } = require('./features/afkDetect');
+const { registerBackup } = require('./features/backup');
 const helpCommand = require('./commands/help');
 const { infoEmbed, errorReply, BRAND } = require('./utils/style');
 const {
@@ -71,8 +75,10 @@ const {
   assertInteractionAccess,
   isDangerousRole,
   allowedGuildIds,
+  allowedRoleIds,
 } = require('./utils/security');
 const { isAllowedSelfRole } = require('./utils/selfroles');
+const { markAction } = require('./utils/logger');
 
 const token = process.env.DISCORD_TOKEN;
 
@@ -103,6 +109,7 @@ const client = new Client({
   ],
   partials: [Partials.GuildMember, Partials.Message, Partials.Channel],
 });
+client.setMaxListeners(25);
 
 client.commands = new Collection();
 
@@ -131,6 +138,9 @@ registerBirthdays(client);
 registerActivity(client);
 registerStats(client);
 registerAutomod(client);
+registerLevels(client);
+registerAfkDetect(client);
+registerBackup(client);
 
 async function leaveIfUnauthorized(guild) {
   if (!leaveUnknownGuilds()) return;
@@ -144,9 +154,35 @@ async function leaveIfUnauthorized(guild) {
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Бот онлайн как ${readyClient.user.tag}`);
   console.log(`[security] разрешённые серверы: ${allowedGuildIds().join(', ')}`);
+  const roles = allowedRoleIds();
+  console.log(
+    roles.length
+      ? `[security] доступ по ролям: ${roles.join(', ')}`
+      : '[security] доступ по ролям: без ограничений',
+  );
   for (const guild of readyClient.guilds.cache.values()) {
     await leaveIfUnauthorized(guild);
   }
+});
+
+client.on(Events.Error, (error) => {
+  console.error('[discord]', error?.message || error);
+});
+
+client.on(Events.ShardDisconnect, (event) => {
+  console.warn('[discord] disconnect', event?.code, event?.reason || '');
+});
+
+client.on(Events.ShardReconnecting, () => {
+  console.warn('[discord] reconnecting…');
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason?.message || reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[uncaughtException]', error?.message || error);
 });
 
 client.on(Events.GuildCreate, async (guild) => {
@@ -157,7 +193,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
-      if (!command) return;
+      if (!command) {
+        console.warn(`[interaction] нет хендлера: /${interaction.commandName}`);
+        return interaction.reply(
+          errorReply(
+            `команда \`/${interaction.commandName}\` не загружена на хосте · сделай push + restart + \`npm run deploy\``,
+          ),
+        );
+      }
 
       const access = assertInteractionAccess(interaction, command);
       if (!access.ok) {
@@ -165,6 +208,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       await command.execute(interaction);
+      return;
+    }
+
+    const tvId = interaction.customId || '';
+    if (
+      tvId.startsWith('tv:') ||
+      tvId.startsWith('tvmodal:') ||
+      tvId.startsWith('tvselect:')
+    ) {
+      const access = assertInteractionAccess(interaction);
+      if (!access.ok) {
+        return interaction.reply(errorReply(access.reason));
+      }
+      await handleTempVoiceInteraction(interaction);
       return;
     }
 
@@ -221,6 +278,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       if (member.roles.cache.has(roleId)) {
+        markAction(`roles:${interaction.guildId}:${member.id}`);
         await member.roles.remove(roleId);
         return interaction.reply({
           embeds: [
@@ -234,6 +292,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         });
       }
 
+      markAction(`roles:${interaction.guildId}:${member.id}`);
       await member.roles.add(roleId);
       return interaction.reply({
         embeds: [

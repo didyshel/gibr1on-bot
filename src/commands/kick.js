@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { canModerate } = require('../utils/moderation');
-const { sendModLog, markAction } = require('../utils/logger');
 const { warnEmbed, errorReply, BRAND } = require('../utils/style');
+const { createCase, formatCaseId } = require('../utils/cases');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -30,10 +30,16 @@ module.exports = {
       return interaction.reply(errorReply(check.reason));
     }
 
-    markAction(`kick:${interaction.guild.id}:${targetUser.id}`);
-    markAction(`leave:${interaction.guild.id}:${targetUser.id}`);
+    const caseEntry = createCase(interaction.guild.id, {
+      type: 'kick',
+      userId: targetUser.id,
+      moderatorId: interaction.user.id,
+      reason,
+    });
+    const caseLabel = formatCaseId(caseEntry.id);
 
-    await target.kick(reason);
+    // Не глушим leave — audit-лог «кикнут» должен отправиться один раз
+    await target.kick(`${caseLabel} · ${reason} · by ${interaction.user.tag}`);
 
     await interaction.reply({
       embeds: [
@@ -47,22 +53,12 @@ module.exports = {
           },
           fields: [
             { name: 'участник', value: `${targetUser}`, inline: true },
+            { name: 'case', value: `\`${caseLabel}\``, inline: true },
             { name: 'id', value: `\`${targetUser.id}\``, inline: true },
             { name: 'причина', value: reason },
           ],
         }),
       ],
-    });
-
-    await sendModLog(interaction.guild, {
-      title: 'kick',
-      color: BRAND.warn,
-      fields: [
-        { name: 'участник', value: `${targetUser} (\`${targetUser.tag}\`)` },
-        { name: 'модератор', value: `${interaction.user}` },
-        { name: 'причина', value: reason },
-      ],
-      footer: `id · ${targetUser.id}`,
     });
   },
 };
