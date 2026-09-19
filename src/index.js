@@ -61,6 +61,7 @@ const {
   isDangerousRole,
   allowedGuildIds,
   allowedRoleIds,
+  ownerIds,
 } = require('./utils/security');
 const { isAllowedSelfRole } = require('./utils/selfroles');
 const { markAction } = require('./utils/logger');
@@ -213,6 +214,12 @@ client.once(Events.ClientReady, async (readyClient) => {
   console.log(`[boot] онлайн как ${readyClient.user.tag}`);
   console.log(`[boot] ws status: ${readyClient.ws.status}`);
   console.log(`[security] разрешённые серверы: ${allowedGuildIds().join(', ')}`);
+  const owners = ownerIds();
+  console.log(
+    owners.length
+      ? `[security] владельцы бота (топовые команды): ${owners.join(', ')}`
+      : '[security] ВНИМАНИЕ: OWNER_IDS пуст — ban/warn/automod и т.п. недоступны никому',
+  );
   const roles = allowedRoleIds();
   console.log(
     roles.length

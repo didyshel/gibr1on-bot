@@ -20,12 +20,10 @@ const PAGES = {
   mod: {
     title: 'модерация',
     description: [
+      'только gibr1on (OWNER_IDS):',
       '`/kick` · `/ban` · `/softban` · `/unban`',
-      '`/timeout` — мут · `0` снять',
-      '`/warn` · `/warns list|remove|clear`',
-      '`/case get|user|void|reason`',
-      '`/clear` — удалить сообщения',
-      '`/automod` — status · toggle · ignore · words',
+      '`/timeout` · `/warn` · `/warns` · `/case`',
+      '`/clear` · `/automod` · `/levelrole` · `/roles` · `/voice`',
     ].join('\n'),
   },
   util: {

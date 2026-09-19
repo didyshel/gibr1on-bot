@@ -34,6 +34,26 @@ const PUBLIC_COMMANDS = new Set([
   'activity',
 ]);
 
+/**
+ * Топовые команды — только OWNER_IDS (gibr1on).
+ * Остальные модеры/админы Discord их не выполнят.
+ */
+const OWNER_ONLY_COMMANDS = new Set([
+  'ban',
+  'kick',
+  'softban',
+  'unban',
+  'timeout',
+  'warn',
+  'warns',
+  'case',
+  'clear',
+  'automod',
+  'levelrole',
+  'roles',
+  'voice',
+]);
+
 function envList(name) {
   const raw = process.env[name];
   if (!raw || /your_|_here|вставь/i.test(raw)) return [];
@@ -151,13 +171,10 @@ function assertInteractionAccess(interaction, command = null) {
   const rate = checkRateLimit(interaction.user.id);
   if (!rate.ok) return rate;
 
-  if (isOwner(interaction.user.id)) return { ok: true };
-
-  if (interaction.guild?.ownerId === interaction.user.id) return { ok: true };
-
   const cmdName = command?.data?.name || interaction.commandName || null;
   const customId = interaction.customId || '';
   const isPublicCmd = cmdName && PUBLIC_COMMANDS.has(cmdName);
+  const isOwnerCmd = cmdName && OWNER_ONLY_COMMANDS.has(cmdName);
   const isPublicUi =
     customId.startsWith('help:') ||
     customId.startsWith('selfrole:') ||
@@ -165,8 +182,23 @@ function assertInteractionAccess(interaction, command = null) {
     customId.startsWith('tvmodal:') ||
     customId.startsWith('tvselect:');
 
+  // Топовые slash-команды — строго OWNER_IDS
+  if (isOwnerCmd) {
+    if (!isOwner(interaction.user.id)) {
+      return { ok: false, reason: 'только для gibr1on (OWNER_IDS)' };
+    }
+    return { ok: true };
+  }
+
+  if (isOwner(interaction.user.id)) return { ok: true };
+
+  if (isPublicCmd || isPublicUi) {
+    return { ok: true };
+  }
+
+  // Остальное (напр. /vc): роль-гейт + Discord permissions
   const roleGate = allowedRoleIds();
-  if (roleGate.length && !isPublicCmd && !isPublicUi && !memberHasAllowedRole(interaction.member)) {
+  if (roleGate.length && !memberHasAllowedRole(interaction.member)) {
     return { ok: false, reason: 'нужна разрешённая роль' };
   }
 
@@ -183,6 +215,7 @@ function assertInteractionAccess(interaction, command = null) {
 module.exports = {
   DANGEROUS_ROLE_PERMS,
   PUBLIC_COMMANDS,
+  OWNER_ONLY_COMMANDS,
   allowedGuildIds,
   allowedRoleIds,
   ownerIds,
