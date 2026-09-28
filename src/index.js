@@ -158,7 +158,12 @@ safeRegister('tempVoice', () => {
   handleTempVoiceInteraction = mod.handleTempVoiceInteraction;
 });
 
-let handleApplicationsInteraction = async () => {};
+let handleApplicationsInteraction = async (interaction) => {
+  await safeRespond(
+    interaction,
+    errorReply('заявки не загружены · Pull + Restart на FadeHost'),
+  );
+};
 safeRegister('applications', () => {
   handleApplicationsInteraction = require('./features/applications').handleApplicationsInteraction;
 });

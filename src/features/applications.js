@@ -6,7 +6,6 @@ const {
   TextInputBuilder,
   TextInputStyle,
   PermissionFlagsBits,
-  MessageFlags,
 } = require('discord.js');
 const { readJson, writeJson } = require('../utils/store');
 const { applyReviewChannelId, applyAcceptRoleId } = require('../utils/config');
@@ -98,12 +97,12 @@ function buildApplyModal() {
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('age')
-        .setLabel('Возраст OOC (настоящий возраст)')
+        .setLabel('Возраст OOC')
         .setStyle(TextInputStyle.Short)
         .setMinLength(1)
         .setMaxLength(8)
         .setRequired(true)
-        .setPlaceholder('например: 18'),
+        .setPlaceholder('настоящий возраст, например 18'),
     ),
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
@@ -186,6 +185,24 @@ function parseReviewId(customId) {
 }
 
 async function handleApplicationsInteraction(interaction) {
+  try {
+    await handleApplicationsInteractionInner(interaction);
+  } catch (error) {
+    console.error('[apply] error:', error);
+    const payload = errorReply(error?.message || 'ошибка заявки');
+    try {
+      if (interaction.deferred || interaction.replied) {
+        await interaction.followUp(payload);
+      } else if (interaction.isModalSubmit?.() || interaction.isButton?.()) {
+        await interaction.reply(payload);
+      }
+    } catch (replyErr) {
+      console.error('[apply] reply fail:', replyErr.message);
+    }
+  }
+}
+
+async function handleApplicationsInteractionInner(interaction) {
   const id = interaction.customId || '';
 
   if (interaction.isButton() && id === 'apply:open') {
@@ -201,7 +218,7 @@ async function handleApplicationsInteraction(interaction) {
             color: BRAND.soft,
           }),
         ],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
     return interaction.showModal(buildApplyModal());
@@ -237,7 +254,7 @@ async function handleApplicationsInteraction(interaction) {
             color: BRAND.soft,
           }),
         ],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -258,10 +275,18 @@ async function handleApplicationsInteraction(interaction) {
 
     const appId = String(Date.now());
     const embed = applicationEmbed(interaction.user, answers, 'ожидает');
-    const message = await channel.send({
-      embeds: [embed],
-      components: [reviewButtons(interaction.user.id, appId)],
-    });
+    let message;
+    try {
+      message = await channel.send({
+        embeds: [embed],
+        components: [reviewButtons(interaction.user.id, appId)],
+      });
+    } catch (sendErr) {
+      console.error('[apply] send fail:', sendErr);
+      return interaction.reply(
+        errorReply('не удалось отправить заявку в канал рассмотрения'),
+      );
+    }
 
     settings.pending[interaction.user.id] = {
       id: appId,
@@ -279,7 +304,7 @@ async function handleApplicationsInteraction(interaction) {
           description: 'заявка отправлена · жди решения руководства',
         }),
       ],
-      flags: MessageFlags.Ephemeral,
+      ephemeral: true,
     });
   }
 

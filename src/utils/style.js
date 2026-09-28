@@ -26,11 +26,10 @@ function brandEmbed(options = {}) {
   if (options.image) embed.setImage(options.image);
   if (options.url) embed.setURL(options.url);
   if (options.author) {
-    embed.setAuthor({
-      name: options.author.name,
-      iconURL: options.author.iconURL,
-      url: options.author.url,
-    });
+    const author = { name: String(options.author.name || BRAND.name).slice(0, 256) };
+    if (options.author.iconURL) author.iconURL = options.author.iconURL;
+    if (options.author.url) author.url = options.author.url;
+    embed.setAuthor(author);
   }
   if (options.fields?.length) {
     embed.addFields(
