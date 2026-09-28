@@ -158,6 +158,11 @@ safeRegister('tempVoice', () => {
   handleTempVoiceInteraction = mod.handleTempVoiceInteraction;
 });
 
+let handleApplicationsInteraction = async () => {};
+safeRegister('applications', () => {
+  handleApplicationsInteraction = require('./features/applications').handleApplicationsInteraction;
+});
+
 safeRegister('reminders', () => require('./features/reminders').registerReminders(client));
 safeRegister('birthdays', () => require('./features/birthdays').registerBirthdays(client));
 safeRegister('activity', () => require('./features/activity').registerActivity(client));
@@ -322,6 +327,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
       await handleTempVoiceInteraction(interaction);
+      return;
+    }
+
+    if (tvId === 'apply:open' || tvId === 'apply:modal' || tvId.startsWith('apply:accept:') || tvId.startsWith('apply:reject:')) {
+      const access = assertInteractionAccess(interaction);
+      if (!access.ok) {
+        await safeRespond(interaction, errorReply(access.reason));
+        return;
+      }
+      await handleApplicationsInteraction(interaction);
       return;
     }
 

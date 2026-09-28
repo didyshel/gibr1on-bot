@@ -52,6 +52,7 @@ const OWNER_ONLY_COMMANDS = new Set([
   'levelrole',
   'roles',
   'voice',
+  'apply',
 ]);
 
 function envList(name) {
@@ -180,7 +181,11 @@ function assertInteractionAccess(interaction, command = null) {
     customId.startsWith('selfrole:') ||
     customId.startsWith('tv:') ||
     customId.startsWith('tvmodal:') ||
-    customId.startsWith('tvselect:');
+    customId.startsWith('tvselect:') ||
+    customId === 'apply:open' ||
+    customId === 'apply:modal' ||
+    customId.startsWith('apply:accept:') ||
+    customId.startsWith('apply:reject:');
 
   // Топовые slash-команды — строго OWNER_IDS
   if (isOwnerCmd) {

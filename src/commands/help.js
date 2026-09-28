@@ -23,7 +23,7 @@ const PAGES = {
       'только gibr1on (OWNER_IDS):',
       '`/kick` · `/ban` · `/softban` · `/unban`',
       '`/timeout` · `/warn` · `/warns` · `/case`',
-      '`/clear` · `/automod` · `/levelrole` · `/roles` · `/voice`',
+      '`/clear` · `/automod` · `/levelrole` · `/roles` · `/voice` · `/apply`',
     ].join('\n'),
   },
   util: {
@@ -31,6 +31,7 @@ const PAGES = {
     description: [
       '`/ping` · `/server` · `/help`',
       '`/roles setup` — панель ролей',
+      '`/apply setup` — панель заявок на вступление',
       '`/remind add|list|cancel` · `/activity` · `/bday`',
       '`/level` · `/leaderboard` · `/levelrole setup`',
       '`/vc` — управление temp voice',
@@ -42,6 +43,7 @@ const PAGES = {
     title: 'сервер',
     description: [
       'временные войсы — hub + панель владельца',
+      'заявки — модалка + принять/отклонить',
       'автомод — тогглы + ignore + стоп-слова',
       'варны — эскалация timeout/kick по порогам',
       'левелинг — сообщения + войс · роли активности',

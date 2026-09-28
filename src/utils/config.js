@@ -74,6 +74,11 @@ module.exports = {
   statsMembersChannelId: () => env('STATS_MEMBERS_CHANNEL_ID'),
   statsOnlineChannelId: () => env('STATS_ONLINE_CHANNEL_ID'),
   birthdayChannelId: () => env('BIRTHDAY_CHANNEL_ID') || env('WELCOME_CHANNEL_ID'),
+  /** Канал рассмотрения заявок (/apply) */
+  applyReviewChannelId: () =>
+    env('APPLY_REVIEW_CHANNEL_ID') || '1554237922343911576',
+  /** Роль при принятии заявки — можно переопределить в /apply setup */
+  applyAcceptRoleId: () => env('APPLY_ACCEPT_ROLE_ID'),
   automodInvites: () => envFlag('AUTOMOD_INVITES', true),
   automodSpam: () => envFlag('AUTOMOD_SPAM', true),
   automodWords: () => envFlag('AUTOMOD_WORDS', true),
