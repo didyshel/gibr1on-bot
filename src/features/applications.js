@@ -273,6 +273,18 @@ async function handleApplicationsInteractionInner(interaction) {
       return interaction.reply(errorReply('канал рассмотрения недоступен'));
     }
 
+    const me = interaction.guild.members.me;
+    if (me) {
+      const perms = channel.permissionsFor(me);
+      if (!perms?.has(PermissionFlagsBits.ViewChannel) || !perms?.has(PermissionFlagsBits.SendMessages)) {
+        return interaction.reply(
+          errorReply(
+            `боту закрыт канал рассмотрения ${channel} · выдай **Просмотр канала** и **Отправка сообщений**`,
+          ),
+        );
+      }
+    }
+
     const appId = String(Date.now());
     const embed = applicationEmbed(interaction.user, answers, 'ожидает');
     let message;
@@ -283,9 +295,15 @@ async function handleApplicationsInteractionInner(interaction) {
       });
     } catch (sendErr) {
       console.error('[apply] send fail:', sendErr);
-      return interaction.reply(
-        errorReply('не удалось отправить заявку в канал рассмотрения'),
-      );
+      const code = sendErr?.code;
+      let hint = 'не удалось отправить заявку в канал рассмотрения';
+      if (code === 50001 || code === 50013) {
+        hint =
+          'боту не хватает прав в канале рассмотрения · нужен **Просмотр канала** + **Отправка сообщений** + **Встраивание ссылок**';
+      } else if (sendErr?.message) {
+        hint = `не удалось отправить заявку · ${String(sendErr.message).slice(0, 120)}`;
+      }
+      return interaction.reply(errorReply(hint));
     }
 
     settings.pending[interaction.user.id] = {
