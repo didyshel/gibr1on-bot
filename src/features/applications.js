@@ -61,11 +61,11 @@ function panelRow() {
     new ButtonBuilder()
       .setCustomId('apply:open')
       .setLabel('Подать заявку')
-      .setStyle(ButtonStyle.Success),
+      .setStyle(ButtonStyle.Danger),
   );
 }
 
-/** Сообщение как на скрине: только зелёная кнопка, без текста и эмбеда */
+/** Сообщение панели: красная кнопка заявки */
 function panelPayload() {
   return { components: [panelRow()] };
 }
@@ -133,7 +133,7 @@ function reviewButtons(userId, appId) {
     new ButtonBuilder()
       .setCustomId(`apply:accept:${userId}:${appId}`)
       .setLabel('принять')
-      .setStyle(ButtonStyle.Success),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`apply:reject:${userId}:${appId}`)
       .setLabel('отклонить')

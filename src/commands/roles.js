@@ -98,7 +98,7 @@ module.exports = {
         new ButtonBuilder()
           .setCustomId(`selfrole:${role.id}`)
           .setLabel(role.name.slice(0, 80))
-          .setStyle(ButtonStyle.Secondary),
+          .setStyle(ButtonStyle.Danger),
       ),
     );
 

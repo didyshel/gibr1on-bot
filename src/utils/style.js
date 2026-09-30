@@ -1,17 +1,26 @@
 const { MessageFlags } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 
-/** Фиолетовый неон · минимализм */
+/** Кровавая палитра Blood — все оттенки красного */
 const BRAND = {
-  color: 0xb026ff,
-  soft: 0x7c3aed,
-  glow: 0xe879f9,
-  success: 0x2dd4bf,
-  warn: 0xf0abfc,
-  danger: 0xfb7185,
-  muted: 0x4c1d95,
-  footer: 'gibr1on',
-  name: 'gibr1on',
+  /** основной акцент */
+  color: 0xb91c1c,
+  /** приглушённый тёмно-красный */
+  soft: 0x7f1d1d,
+  /** яркий «свежий» кровь */
+  glow: 0xff1f1f,
+  /** успех / принято — тёмная кровь */
+  success: 0x8b0000,
+  /** предупреждение */
+  warn: 0xdc2626,
+  /** ошибка / отклонено — глубокий crimson */
+  danger: 0x991b1b,
+  /** почти чёрный с красным подтоном */
+  muted: 0x140303,
+  /** чистый blood для редких акцентов */
+  blood: 0xc41e3a,
+  footer: 'Blood App',
+  name: 'Blood App',
 };
 
 function brandEmbed(options = {}) {

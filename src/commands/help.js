@@ -8,7 +8,7 @@ const { brandEmbed, BRAND } = require('../utils/style');
 
 const PAGES = {
   home: {
-    title: 'gibr1on',
+    title: 'Blood App',
     description: [
       'личный бот сервера',
       '',
@@ -67,19 +67,19 @@ function pageRow() {
     new ButtonBuilder()
       .setCustomId('help:home')
       .setLabel('главная')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:mod')
       .setLabel('модерация')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:util')
       .setLabel('утилиты')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:server')
       .setLabel('сервер')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Danger),
   );
 }
 

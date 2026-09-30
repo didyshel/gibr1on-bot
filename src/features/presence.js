@@ -2,14 +2,14 @@ const { Events, ActivityType } = require('discord.js');
 
 function registerPresence(client) {
   const statuses = [
-    () => ({ name: 'gibr1on', type: ActivityType.Watching }),
-    () => ({ name: '/help', type: ActivityType.Listening }),
+    () => ({ name: 'Blood App', type: ActivityType.Watching }),
+    () => ({ name: 'семью Blood', type: ActivityType.Watching }),
+    () => ({ name: '/help · Blood', type: ActivityType.Listening }),
     () => {
       const guild = client.guilds.cache.first();
       const count = guild?.memberCount ?? 0;
-      return { name: `${count} online`, type: ActivityType.Watching };
+      return { name: `${count} в крови`, type: ActivityType.Watching };
     },
-    () => ({ name: 'neon · quiet', type: ActivityType.Playing }),
   ];
 
   let index = 0;
@@ -18,7 +18,7 @@ function registerPresence(client) {
     index += 1;
     client.user?.setPresence({
       activities: [status],
-      status: 'online',
+      status: 'dnd',
     });
   };
 

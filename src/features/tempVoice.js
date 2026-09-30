@@ -42,15 +42,15 @@ function controlRow(channelId) {
     new ButtonBuilder()
       .setCustomId(`tv:rename:${channelId}`)
       .setLabel('имя')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`tv:limit:${channelId}`)
       .setLabel('лимит')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`tv:lock:${channelId}`)
       .setLabel('lock')
-      .setStyle(ButtonStyle.Secondary),
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`tv:kick:${channelId}`)
       .setLabel('kick')
