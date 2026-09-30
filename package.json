@@ -1,7 +1,7 @@
 {
   "name": "gibr1on-bot",
   "version": "1.0.0",
-  "description": "Personal Discord bot for gibr1on",
+  "description": "Blood App — Discord bot",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
