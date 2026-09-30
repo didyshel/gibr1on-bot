@@ -1,21 +1,13 @@
 const { Events, AttachmentBuilder } = require('discord.js');
-const { welcomeChannelId, autoRoleId, welcomeCard } = require('../utils/config');
+const { welcomeChannelId, welcomeCard } = require('../utils/config');
 const { brandEmbed, BRAND } = require('../utils/style');
 const { isAllowedGuild } = require('../utils/security');
 const { renderWelcomeCard } = require('../utils/welcomeCard');
-const { markAction } = require('../utils/logger');
 
 function registerWelcome(client) {
   client.on(Events.GuildMemberAdd, async (member) => {
     try {
       if (!isAllowedGuild(member.guild.id)) return;
-      const roleId = autoRoleId();
-      if (roleId) {
-        markAction(`roles:${member.guild.id}:${member.id}`);
-        await member.roles.add(roleId).catch((err) => {
-          console.warn('Не удалось выдать автороль:', err.message);
-        });
-      }
 
       const channelId = welcomeChannelId();
       if (!channelId) return;
@@ -25,13 +17,14 @@ function registerWelcome(client) {
 
       const created = Math.floor(member.user.createdTimestamp / 1000);
       const embed = brandEmbed({
-        title: 'welcome',
+        title: 'BLOOD · welcome',
         description: [
           `${member}`,
           '',
-          `**${member.guild.name}**`,
+          'ты переступил порог семьи **Blood**.',
+          'здесь ждут актив, контент и своих.',
           '',
-          'правила · роли · добро пожаловать',
+          'ознакомься с правилами · подай заявку · стань частью крови.',
         ].join('\n'),
         thumbnail: member.user.displayAvatarURL({ size: 512 }),
         color: BRAND.color,
@@ -39,7 +32,7 @@ function registerWelcome(client) {
           { name: 'участников', value: `\`${member.guild.memberCount}\``, inline: true },
           { name: 'аккаунт', value: `<t:${created}:R>`, inline: true },
         ],
-        footer: `id · ${member.id}`,
+        footer: `Blood · ${member.id}`,
       });
 
       const payload = { content: `${member}`, embeds: [embed] };
