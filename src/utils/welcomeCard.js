@@ -15,7 +15,11 @@ function getCanvas() {
 }
 
 function artPath() {
-  return path.join(__dirname, '..', '..', 'assets', 'blood-welcome.png');
+  const assets = path.join(__dirname, '..', '..', 'assets');
+  const preferred = path.join(assets, 'nemiroff-welcome.png');
+  const legacy = path.join(assets, 'blood-welcome.png');
+  if (fs.existsSync(preferred)) return preferred;
+  return legacy;
 }
 
 /**
@@ -39,7 +43,7 @@ async function renderWelcomeCard({
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  // фон из арта Blood
+  // фон из арта Nemiroff
   try {
     const file = artPath();
     if (fs.existsSync(file)) {
@@ -65,7 +69,7 @@ async function renderWelcomeCard({
   ctx.fillStyle = veil;
   ctx.fillRect(0, 0, width, height);
 
-  // кровавая полоса
+  // красная полоса
   ctx.fillStyle = '#b91c1c';
   ctx.fillRect(0, 0, width, 4);
   ctx.fillRect(0, height - 4, width, 4);
@@ -74,7 +78,7 @@ async function renderWelcomeCard({
 
   ctx.fillStyle = '#fecaca';
   ctx.font = 'bold 28px sans-serif';
-  ctx.fillText('BLOOD', 56, 78);
+  ctx.fillText('NEMIROFF', 56, 78);
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 48px sans-serif';
@@ -91,7 +95,7 @@ async function renderWelcomeCard({
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.font = '20px sans-serif';
   ctx.fillText(
-    `${guildName || 'Blood'} · участник #${memberCount || 0}`,
+    `${guildName || 'Nemiroff'} · участник #${memberCount || 0}`,
     56,
     300,
   );

@@ -40,7 +40,7 @@ module.exports = {
             { name: 'создан', value: `<t:${created}:D>`, inline: true },
             { name: 'id', value: `\`${guild.id}\``, inline: true },
           ],
-          footer: `Blood App · ${guild.name}`,
+          footer: `Nemiroff App · ${guild.name}`,
         }),
       ],
     });

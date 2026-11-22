@@ -17,14 +17,14 @@ function registerWelcome(client) {
 
       const created = Math.floor(member.user.createdTimestamp / 1000);
       const embed = brandEmbed({
-        title: 'BLOOD · welcome',
+        title: 'NEMIROFF · welcome',
         description: [
           `${member}`,
           '',
-          'ты переступил порог семьи **Blood**.',
+          'ты переступил порог семьи **Nemiroff**.',
           'здесь ждут актив, контент и своих.',
           '',
-          'ознакомься с правилами · подай заявку · стань частью крови.',
+          'ознакомься с правилами · подай заявку · стань частью семьи.',
         ].join('\n'),
         thumbnail: member.user.displayAvatarURL({ size: 512 }),
         color: BRAND.color,
@@ -32,7 +32,7 @@ function registerWelcome(client) {
           { name: 'участников', value: `\`${member.guild.memberCount}\``, inline: true },
           { name: 'аккаунт', value: `<t:${created}:R>`, inline: true },
         ],
-        footer: `Blood · ${member.id}`,
+        footer: `Nemiroff · ${member.id}`,
       });
 
       const payload = { content: `${member}`, embeds: [embed] };

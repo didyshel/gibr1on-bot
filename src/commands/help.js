@@ -8,7 +8,7 @@ const { brandEmbed, BRAND } = require('../utils/style');
 
 const PAGES = {
   home: {
-    title: 'Blood App',
+    title: 'Nemiroff App',
     description: [
       'личный бот сервера',
       '',

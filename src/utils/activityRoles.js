@@ -1,4 +1,4 @@
-/** Роли активности — кровавая линейка от тёмной к яркой крови */
+/** Роли активности — красная линейка Nemiroff */}
 const ACTIVITY_ROLES = [
   { level: 1, name: 'Новичок', color: 0x3b0a0a, hoist: false },
   { level: 5, name: 'Заглянул', color: 0x5c1010, hoist: false },

@@ -1,26 +1,26 @@
 const { MessageFlags } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 
-/** Кровавая палитра Blood — все оттенки красного */
+/** Палитра Nemiroff — тёмно-красная */
 const BRAND = {
   /** основной акцент */
   color: 0xb91c1c,
   /** приглушённый тёмно-красный */
   soft: 0x7f1d1d,
-  /** яркий «свежий» кровь */
+  /** яркий акцент */
   glow: 0xff1f1f,
-  /** успех / принято — тёмная кровь */
+  /** успех / принято */
   success: 0x8b0000,
   /** предупреждение */
   warn: 0xdc2626,
-  /** ошибка / отклонено — глубокий crimson */
+  /** ошибка / отклонено */
   danger: 0x991b1b,
   /** почти чёрный с красным подтоном */
   muted: 0x140303,
-  /** чистый blood для редких акцентов */
-  blood: 0xc41e3a,
-  footer: 'Blood App',
-  name: 'Blood App',
+  /** яркий crimson для редких акцентов */
+  accent: 0xc41e3a,
+  footer: 'Nemiroff App',
+  name: 'Nemiroff App',
 };
 
 function brandEmbed(options = {}) {
