@@ -8,7 +8,7 @@ function getCanvas() {
   try {
     canvasApi = require('@napi-rs/canvas');
   } catch (error) {
-    console.warn('[welcomeCard] canvas недоступен:', error.message);
+    console.warn('[welcomeCard] canvas недоступний:', error.message);
     canvasApi = false;
   }
   return canvasApi;
@@ -43,7 +43,7 @@ async function renderWelcomeCard({
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  // фон из арта Nemiroff
+  // фон з арту Nemiroff
   try {
     const file = artPath();
     if (fs.existsSync(file)) {
@@ -61,7 +61,7 @@ async function renderWelcomeCard({
     ctx.fillRect(0, 0, width, height);
   }
 
-  // тёмный градиент слева под текст
+  // темний градієнт зліва під текст
   const veil = ctx.createLinearGradient(0, 0, width * 0.72, 0);
   veil.addColorStop(0, 'rgba(5,0,0,0.88)');
   veil.addColorStop(0.55, 'rgba(5,0,0,0.62)');
@@ -69,7 +69,7 @@ async function renderWelcomeCard({
   ctx.fillStyle = veil;
   ctx.fillRect(0, 0, width, height);
 
-  // красная полоса
+  // червона смуга
   ctx.fillStyle = '#b91c1c';
   ctx.fillRect(0, 0, width, 4);
   ctx.fillRect(0, height - 4, width, 4);
@@ -82,7 +82,7 @@ async function renderWelcomeCard({
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 48px sans-serif';
-  ctx.fillText('добро пожаловать', 56, 145);
+  ctx.fillText('ласкаво просимо', 56, 145);
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 36px sans-serif';
@@ -95,14 +95,14 @@ async function renderWelcomeCard({
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.font = '20px sans-serif';
   ctx.fillText(
-    `${guildName || 'Nemiroff'} · участник #${memberCount || 0}`,
+    `${guildName || 'Nemiroff'} · учасник #${memberCount || 0}`,
     56,
     300,
   );
 
   ctx.fillStyle = 'rgba(185,28,28,0.95)';
   ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('семья уже ждёт тебя', 56, 355);
+  ctx.fillText('сім\'я вже чекає на тебе', 56, 355);
 
   if (avatarURL) {
     try {
@@ -111,7 +111,7 @@ async function renderWelcomeCard({
       const x = width - size - 64;
       const y = (height - size) / 2;
 
-      // мягкое свечение
+      // м'яке сяйво
       ctx.beginPath();
       ctx.arc(x + size / 2, y + size / 2, size / 2 + 8, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(185,28,28,0.35)';

@@ -18,7 +18,7 @@ function createCase(guildId, { type, userId, moderatorId, reason, meta = {} }) {
     type,
     userId: String(userId),
     moderatorId: String(moderatorId),
-    reason: reason || 'не указана',
+    reason: reason || 'не вказана',
     meta,
     at: Date.now(),
     voided: false,
@@ -53,7 +53,7 @@ function voidCase(guildId, caseId, { moderatorId, reason } = {}) {
   entry.voided = true;
   entry.voidedBy = String(moderatorId || '');
   entry.voidedAt = Date.now();
-  entry.voidReason = reason || 'отменён';
+  entry.voidReason = reason || 'скасовано';
   writeJson(FILE, data);
   return entry;
 }
@@ -62,7 +62,7 @@ function updateCaseReason(guildId, caseId, reason) {
   const data = readJson(FILE, {});
   const entry = data[guildId]?.items?.[String(caseId)];
   if (!entry) return null;
-  entry.reason = reason || 'не указана';
+  entry.reason = reason || 'не вказана';
   entry.reasonUpdatedAt = Date.now();
   writeJson(FILE, data);
   return entry;

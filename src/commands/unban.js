@@ -5,10 +5,10 @@ const { createCase, formatCaseId } = require('../utils/cases');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('unban')
-    .setDescription('Разбанить пользователя')
+    .setDescription('Розбанити користувача')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addStringOption((opt) =>
-      opt.setName('user_id').setDescription('ID пользователя').setRequired(true),
+      opt.setName('user_id').setDescription('ID користувача').setRequired(true),
     )
     .addStringOption((opt) =>
       opt.setName('reason').setDescription('Причина').setRequired(false),
@@ -17,16 +17,16 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.options.getString('user_id', true).trim();
     const reason =
-      interaction.options.getString('reason') || 'не указана';
+      interaction.options.getString('reason') || 'не вказана';
 
     if (!/^\d{17,20}$/.test(userId)) {
-      return interaction.reply(errorReply('нужен числовой user id'));
+      return interaction.reply(errorReply('потрібен числовий user id'));
     }
 
     const bans = await interaction.guild.bans.fetch().catch(() => null);
     const ban = bans?.get(userId);
     if (!ban) {
-      return interaction.reply(errorReply('этот id не в бане'));
+      return interaction.reply(errorReply('цей id не в бані'));
     }
 
     const caseEntry = createCase(interaction.guild.id, {
@@ -50,7 +50,7 @@ module.exports = {
           color: BRAND.success,
           thumbnail: user.displayAvatarURL({ size: 256 }),
           fields: [
-            { name: 'участник', value: `${user}`, inline: true },
+            { name: 'учасник', value: `${user}`, inline: true },
             { name: 'case', value: `\`${caseLabel}\``, inline: true },
             { name: 'причина', value: reason },
           ],

@@ -115,7 +115,7 @@ function getLeaderboard(guildId, limit = 10) {
     .slice(0, limit);
 }
 
-/** Высшая роль за достигнутый уровень из привязок */
+/** Найвища роль за досягнутий рівень із прив’язок */
 function highestRoleForLevel(guildId, level) {
   const roles = getLevelRoles(guildId);
   let best = null;
@@ -131,7 +131,7 @@ function highestRoleForLevel(guildId, level) {
 }
 
 /**
- * Оставляем только текущий ранг активности (снимаем остальные level-роли).
+ * Залишаємо лише поточний ранг активності (знімаємо інші level-ролі).
  */
 async function applyLevelRoles(member, level) {
   const roles = getLevelRoles(member.guild.id);
@@ -187,7 +187,7 @@ function isVoiceEligible(voiceState) {
   const channel = voiceState.channel;
   if (!channel) return false;
 
-  // XP только если в канале есть ещё кто-то живой (не соло-фарм)
+  // XP лише якщо в каналі є ще хтось живий (не соло-фарм)
   const others = channel.members.filter((m) => !m.user.bot && m.id !== voiceState.id);
   if (others.size < 1) return false;
 
@@ -226,7 +226,7 @@ function registerLevels(client) {
       if (isInfoUserChannel(message.channel)) return;
       if (isLogChannelId(message.channelId)) return;
 
-      // Пустые сообщения / только компоненты — не считаем
+      // Порожні повідомлення / лише компоненти — не рахуємо
       const content = (message.content || '').trim();
       const hasMedia =
         message.attachments?.size > 0 ||
@@ -257,7 +257,7 @@ function registerLevels(client) {
               brandEmbed({
                 title: 'level up',
                 color: BRAND.success,
-                description: `${message.author} · уровень **${result.level}**${rolePart}`,
+                description: `${message.author} · рівень **${result.level}**${rolePart}`,
               }),
             ],
           })
@@ -278,7 +278,7 @@ function registerLevels(client) {
 
       trackVoiceMember(member);
 
-      // Пересчитать соседей в старом и новом канале
+      // Перерахувати сусідів у старому та новому каналі
       for (const ch of [oldState.channel, newState.channel]) {
         if (!ch) continue;
         for (const m of ch.members.values()) {
@@ -322,7 +322,7 @@ function registerLevels(client) {
                   brandEmbed({
                     title: 'level up',
                     color: BRAND.success,
-                    description: `${member} · уровень **${result.level}**${rolePart}`,
+                    description: `${member} · рівень **${result.level}**${rolePart}`,
                   }),
                 ],
               })

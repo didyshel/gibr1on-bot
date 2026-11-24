@@ -1,23 +1,23 @@
 const { MessageFlags } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 
-/** Палитра Nemiroff — тёмно-красная */
+/** Палітра Nemiroff — темно-червона */
 const BRAND = {
-  /** основной акцент */
+  /** основний акцент */
   color: 0xb91c1c,
-  /** приглушённый тёмно-красный */
+  /** приглушений темно-червоний */
   soft: 0x7f1d1d,
-  /** яркий акцент */
+  /** яскравий акцент */
   glow: 0xff1f1f,
-  /** успех / принято */
+  /** успіх / прийнято */
   success: 0x8b0000,
-  /** предупреждение */
+  /** попередження */
   warn: 0xdc2626,
-  /** ошибка / отклонено */
+  /** помилка / відхилено */
   danger: 0x991b1b,
-  /** почти чёрный с красным подтоном */
+  /** майже чорний з червонуватим відтінком */
   muted: 0x140303,
-  /** яркий crimson для редких акцентов */
+  /** яскравий crimson для рідкісних акцентів */
   accent: 0xc41e3a,
   footer: 'Nemiroff App',
   name: 'Nemiroff App',
@@ -71,13 +71,13 @@ function infoEmbed(options = {}) {
   return brandEmbed({ ...options, color: options.color ?? BRAND.color });
 }
 
-/** Короткий ephemeral-ответ об ошибке */
+/** Коротка ephemeral-відповідь про помилку */
 function errorReply(description, extra = {}) {
   return {
     embeds: [
       errorEmbed({
-        title: extra.title || 'ошибка',
-        description: String(description || 'ошибка').slice(0, 2000),
+        title: extra.title || 'помилка',
+        description: String(description || 'помилка').slice(0, 2000),
       }),
     ],
     flags: MessageFlags.Ephemeral,

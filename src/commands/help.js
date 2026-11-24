@@ -10,45 +10,45 @@ const PAGES = {
   home: {
     title: 'Nemiroff App',
     description: [
-      'личный бот сервера',
+      'особистий бот сервера',
       '',
-      'модерация · логи · роли · уровни · войс',
+      'модерація · логи · ролі · рівні · войс',
       '',
-      'выбери раздел ниже',
+      'обери розділ нижче',
     ].join('\n'),
   },
   mod: {
-    title: 'модерация',
+    title: 'модерація',
     description: [
-      'только gibr1on (OWNER_IDS):',
+      'лише gibr1on (OWNER_IDS):',
       '`/kick` · `/ban` · `/softban` · `/unban`',
       '`/timeout` · `/warn` · `/warns` · `/case`',
       '`/clear` · `/automod` · `/levelrole` · `/roles` · `/voice` · `/apply`',
     ].join('\n'),
   },
   util: {
-    title: 'утилиты',
+    title: 'утиліти',
     description: [
       '`/ping` · `/server` · `/help`',
       '`/roles setup` — панель ролей',
-      '`/apply setup` — панель заявок на вступление',
+      '`/apply setup` — панель заявок на вступ',
       '`/remind add|list|cancel` · `/activity` · `/bday`',
       '`/level` · `/leaderboard` · `/levelrole setup`',
-      '`/vc` — управление temp voice',
+      '`/vc` — керування temp voice',
       '`/voice` — moveall / muteall / afk',
-      'канал **info user** — карточка по id',
+      'канал **info user** — картка за id',
     ].join('\n'),
   },
   server: {
     title: 'сервер',
     description: [
-      'временные войсы — hub + панель владельца',
-      'заявки — модалка + принять/отклонить',
-      'автомод — тогглы + ignore + стоп-слова',
-      'варны — эскалация timeout/kick по порогам',
-      'левелинг — сообщения + войс · роли активности',
+      'тимчасові войси — hub + панель власника',
+      'заявки — модалка + прийняти/відхилити',
+      'автомод — тогли + ignore + стоп-слова',
+      'варни — ескалація timeout/kick за порогами',
+      'левелінг — повідомлення + войс · ролі активності',
       'welcome card · статистика · логи',
-      'бэкап `src/data` раз в сутки',
+      'бекап `src/data` раз на добу',
     ].join('\n'),
   },
 };
@@ -66,15 +66,15 @@ function pageRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('help:home')
-      .setLabel('главная')
+      .setLabel('головна')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:mod')
-      .setLabel('модерация')
+      .setLabel('модерація')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:util')
-      .setLabel('утилиты')
+      .setLabel('утиліти')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('help:server')
@@ -86,7 +86,7 @@ function pageRow() {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('Справка по командам бота'),
+    .setDescription('Довідка щодо команд бота'),
   async execute(interaction) {
     await interaction.reply({
       embeds: [pageEmbed('home')],

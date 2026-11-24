@@ -9,7 +9,7 @@ const { sendModLog } = require('./logger');
 const { BRAND } = require('./style');
 
 /**
- * После нового варна: timeout и/или kick по порогам из env.
+ * Після нового варна: timeout та/або kick за порогами з env.
  * @returns {Promise<{ actions: string[], cases: object[] }>}
  */
 async function applyWarnEscalation({
@@ -38,7 +38,7 @@ async function applyWarnEscalation({
   const doTimeout = timeoutAt > 0 && warnCount === timeoutAt && !doKick;
 
   if (doTimeout) {
-    const reason = `авто-эскалация: ${warnCount} варн(ов) → timeout ${minutes} мин`;
+    const reason = `авто-ескалація: ${warnCount} варн(ів) → timeout ${minutes} хв`;
     const caseEntry = createCase(guild.id, {
       type: 'warn_timeout',
       userId: targetUser.id,
@@ -51,16 +51,16 @@ async function applyWarnEscalation({
       .timeout(minutes * 60 * 1000, `${caseLabel} · ${reason}`)
       .catch(() => null);
 
-    actions.push(`timeout ${minutes} мин`);
+    actions.push(`timeout ${minutes} хв`);
     cases.push(caseEntry);
 
     await sendModLog(guild, {
       title: `warn escalate · timeout · ${caseLabel}`,
       color: BRAND.warn,
       fields: [
-        { name: 'участник', value: `${targetUser}` },
-        { name: 'варнов', value: String(warnCount), inline: true },
-        { name: 'timeout', value: `${minutes} мин`, inline: true },
+        { name: 'учасник', value: `${targetUser}` },
+        { name: 'варнів', value: String(warnCount), inline: true },
+        { name: 'timeout', value: `${minutes} хв`, inline: true },
         { name: 'case', value: caseLabel, inline: true },
       ],
       footer: `id · ${targetUser.id}`,
@@ -68,7 +68,7 @@ async function applyWarnEscalation({
   }
 
   if (doKick) {
-    const reason = `авто-эскалация: ${warnCount} варн(ов) → kick`;
+    const reason = `авто-ескалація: ${warnCount} варн(ів) → kick`;
     const caseEntry = createCase(guild.id, {
       type: 'warn_kick',
       userId: targetUser.id,
@@ -86,8 +86,8 @@ async function applyWarnEscalation({
       title: `warn escalate · kick · ${caseLabel}`,
       color: BRAND.danger,
       fields: [
-        { name: 'участник', value: `${targetUser}` },
-        { name: 'варнов', value: String(warnCount), inline: true },
+        { name: 'учасник', value: `${targetUser}` },
+        { name: 'варнів', value: String(warnCount), inline: true },
         { name: 'case', value: caseLabel, inline: true },
       ],
       footer: `id · ${targetUser.id}`,

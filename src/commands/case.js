@@ -13,13 +13,13 @@ const { infoEmbed, successEmbed, errorReply, BRAND } = require('../utils/style')
 function caseFields(entry) {
   const fields = [
     { name: 'тип', value: `\`${entry.type}\``, inline: true },
-    { name: 'когда', value: `<t:${Math.floor(entry.at / 1000)}:R>`, inline: true },
+    { name: 'коли', value: `<t:${Math.floor(entry.at / 1000)}:R>`, inline: true },
     {
       name: 'статус',
       value: entry.voided ? '`void`' : '`active`',
       inline: true,
     },
-    { name: 'участник', value: `<@${entry.userId}> (\`${entry.userId}\`)` },
+    { name: 'учасник', value: `<@${entry.userId}> (\`${entry.userId}\`)` },
     { name: 'модератор', value: `<@${entry.moderatorId}>` },
     { name: 'причина', value: entry.reason || '—' },
   ];
@@ -39,12 +39,12 @@ function caseFields(entry) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('case')
-    .setDescription('Кейсы модерации')
+    .setDescription('Кейси модерації')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addSubcommand((sub) =>
       sub
         .setName('get')
-        .setDescription('Найти кейс по номеру')
+        .setDescription('Знайти кейс за номером')
         .addIntegerOption((opt) =>
           opt.setName('id').setDescription('Номер кейса').setRequired(true).setMinValue(1),
         ),
@@ -52,14 +52,14 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('user')
-        .setDescription('Список кейсов участника')
+        .setDescription('Список кейсів учасника')
         .addUserOption((opt) =>
-          opt.setName('user').setDescription('Участник').setRequired(true),
+          opt.setName('user').setDescription('Учасник').setRequired(true),
         )
         .addIntegerOption((opt) =>
           opt
             .setName('limit')
-            .setDescription('Сколько показать (1–25)')
+            .setDescription('Скільки показати (1–25)')
             .setMinValue(1)
             .setMaxValue(25),
         ),
@@ -67,23 +67,23 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('void')
-        .setDescription('Отменить кейс (и связанный warn)')
+        .setDescription('Скасувати кейс (і пов\'язаний warn)')
         .addIntegerOption((opt) =>
           opt.setName('id').setDescription('Номер кейса').setRequired(true).setMinValue(1),
         )
         .addStringOption((opt) =>
-          opt.setName('reason').setDescription('Почему отменяешь'),
+          opt.setName('reason').setDescription('Чому скасовуєш'),
         ),
     )
     .addSubcommand((sub) =>
       sub
         .setName('reason')
-        .setDescription('Изменить причину кейса')
+        .setDescription('Змінити причину кейса')
         .addIntegerOption((opt) =>
           opt.setName('id').setDescription('Номер кейса').setRequired(true).setMinValue(1),
         )
         .addStringOption((opt) =>
-          opt.setName('text').setDescription('Новая причина').setRequired(true),
+          opt.setName('text').setDescription('Нова причина').setRequired(true),
         ),
     ),
 
@@ -94,7 +94,7 @@ module.exports = {
       const id = interaction.options.getInteger('id', true);
       const entry = getCase(interaction.guildId, id);
       if (!entry) {
-        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не найден`));
+        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не знайдено`));
       }
 
       return interaction.reply({
@@ -119,7 +119,7 @@ module.exports = {
           embeds: [
             infoEmbed({
               title: 'cases',
-              description: `у ${user} нет кейсов`,
+              description: `у ${user} немає кейсів`,
               thumbnail: user.displayAvatarURL({ size: 256 }),
             }),
           ],
@@ -144,7 +144,7 @@ module.exports = {
             thumbnail: user.displayAvatarURL({ size: 256 }),
             description: lines.join('\n\n').slice(0, 4000),
             fields: [
-              { name: 'участник', value: `${user}`, inline: true },
+              { name: 'учасник', value: `${user}`, inline: true },
               { name: 'показано', value: `\`${list.length}\``, inline: true },
             ],
           }),
@@ -155,13 +155,13 @@ module.exports = {
 
     if (sub === 'void') {
       const id = interaction.options.getInteger('id', true);
-      const reason = interaction.options.getString('reason') || 'отменён';
+      const reason = interaction.options.getString('reason') || 'скасовано';
       const existing = getCase(interaction.guildId, id);
       if (!existing) {
-        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не найден`));
+        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не знайдено`));
       }
       if (existing.voided) {
-        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} уже void`));
+        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} вже void`));
       }
 
       const entry = voidCase(interaction.guildId, id, {
@@ -179,7 +179,7 @@ module.exports = {
             title: `case · void · ${formatCaseId(entry.id)}`,
             fields: [
               { name: 'тип', value: `\`${entry.type}\``, inline: true },
-              { name: 'участник', value: `<@${entry.userId}>`, inline: true },
+              { name: 'учасник', value: `<@${entry.userId}>`, inline: true },
               { name: 'причина void', value: reason },
             ],
           }),
@@ -200,7 +200,7 @@ module.exports = {
       const text = interaction.options.getString('text', true);
       const entry = updateCaseReason(interaction.guildId, id, text);
       if (!entry) {
-        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не найден`));
+        return interaction.reply(errorReply(`кейс ${formatCaseId(id)} не знайдено`));
       }
 
       return interaction.reply({
@@ -208,7 +208,7 @@ module.exports = {
           successEmbed({
             title: `case · reason · ${formatCaseId(entry.id)}`,
             fields: [
-              { name: 'участник', value: `<@${entry.userId}>`, inline: true },
+              { name: 'учасник', value: `<@${entry.userId}>`, inline: true },
               { name: 'причина', value: entry.reason },
             ],
           }),

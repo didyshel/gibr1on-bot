@@ -12,7 +12,7 @@ async function updateStats(guild) {
   if (membersId) {
     const channel = await guild.channels.fetch(membersId).catch(() => null);
     if (channel) {
-      const name = `👥 Участники: ${guild.memberCount}`.slice(0, 100);
+      const name = `👥 Учасники: ${guild.memberCount}`.slice(0, 100);
       if (channel.name !== name) {
         await channel.setName(name).catch(() => null);
       }

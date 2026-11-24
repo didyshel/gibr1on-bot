@@ -7,7 +7,7 @@ const { createCase, formatCaseId } = require('../utils/cases');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('softban')
-    .setDescription('Softban: бан + разбан (чистит сообщения)')
+    .setDescription('Softban: бан + розбан (чистить повідомлення)')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption((opt) =>
       opt.setName('user').setDescription('Кого softban').setRequired(true),
@@ -18,7 +18,7 @@ module.exports = {
     .addIntegerOption((opt) =>
       opt
         .setName('delete_days')
-        .setDescription('Удалить сообщения за N дней (1–7)')
+        .setDescription('Видалити повідомлення за N днів (1–7)')
         .setMinValue(1)
         .setMaxValue(7)
         .setRequired(false),
@@ -27,7 +27,7 @@ module.exports = {
   async execute(interaction) {
     const targetUser = interaction.options.getUser('user', true);
     const reason =
-      interaction.options.getString('reason') || 'не указана';
+      interaction.options.getString('reason') || 'не вказана';
     const deleteDays = interaction.options.getInteger('delete_days') ?? 1;
 
     const target = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
@@ -65,9 +65,9 @@ module.exports = {
           color: BRAND.warn,
           thumbnail: targetUser.displayAvatarURL({ size: 256 }),
           fields: [
-            { name: 'участник', value: `${targetUser}`, inline: true },
+            { name: 'учасник', value: `${targetUser}`, inline: true },
             { name: 'case', value: `\`${caseLabel}\``, inline: true },
-            { name: 'сообщения', value: `\`${deleteDays}д\``, inline: true },
+            { name: 'повідомлення', value: `\`${deleteDays}д\``, inline: true },
             { name: 'причина', value: reason },
           ],
         }),
@@ -78,7 +78,7 @@ module.exports = {
       title: `softban · ${caseLabel}`,
       color: BRAND.warn,
       fields: [
-        { name: 'участник', value: `${targetUser}` },
+        { name: 'учасник', value: `${targetUser}` },
         { name: 'модератор', value: `${interaction.user}` },
         { name: 'причина', value: reason },
         { name: 'case', value: caseLabel, inline: true },

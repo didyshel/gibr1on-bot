@@ -37,8 +37,8 @@ function cacheMessage(message) {
 }
 
 function channelLabel(channel) {
-  if (!channel) return 'неизвестный канал';
-  if (channel.type === ChannelType.GuildCategory) return `категория **${channel.name}**`;
+  if (!channel) return 'невідомий канал';
+  if (channel.type === ChannelType.GuildCategory) return `категорія **${channel.name}**`;
   if (channel.isVoiceBased?.()) return `${channel} (${channel.name})`;
   return `${channel}`;
 }
@@ -61,7 +61,7 @@ function isTempVoiceName(name) {
 function registerAuditLogs(client) {
   const botId = () => client.user?.id;
 
-  // Только кэш — без лога каждого сообщения (иначе спам)
+  // Лише кеш — без логу кожного повідомлення (інакше спам)
   client.on(Events.MessageCreate, (message) => {
     try {
       if (!message.guild || message.author.bot) return;
@@ -88,7 +88,7 @@ function registerAuditLogs(client) {
       const before =
         oldMessage.content ??
         messageCache.get(newMessage.id)?.content ??
-        '(неизвестно)';
+        '(невідомо)';
       const after = newMessage.content ?? '';
       if (before === after) return;
 
@@ -96,14 +96,14 @@ function registerAuditLogs(client) {
 
       await sendServerLog(newMessage.guild, {
         category: 'message',
-        title: 'Сообщение изменено',
+        title: 'Повідомлення змінено',
         color: BRAND.warn,
         fields: [
           { name: 'Автор', value: `${newMessage.author} (\`${newMessage.author.tag}\`)`, inline: true },
           { name: 'Канал', value: `${newMessage.channel}`, inline: true },
-          { name: 'Было', value: truncate(before) },
-          { name: 'Стало', value: truncate(after || '(пусто)') },
-          { name: 'Ссылка', value: `[Перейти](${newMessage.url})` },
+          { name: 'Було', value: truncate(before) },
+          { name: 'Стало', value: truncate(after || '(порожньо)') },
+          { name: 'Посилання', value: `[Перейти](${newMessage.url})` },
         ],
         footer: `ID: ${newMessage.id}`,
       });
@@ -118,7 +118,7 @@ function registerAuditLogs(client) {
       if (!guild) return;
       if (shouldSkipMessageLog(message.channel) || isLogChannel(message.channelId)) return;
 
-      // Точечный skip только для сообщений, которые удалил автомод/бот сам
+      // Точковий skip лише для повідомлень, які видалив автомод/бот сам
       if (consumeAction(`delmsg:${message.id}`)) {
         messageCache.delete(message.id);
         return;
@@ -142,7 +142,7 @@ function registerAuditLogs(client) {
       const content =
         message.content ||
         cached?.content ||
-        '(содержимое недоступно — сообщение не было в кэше)';
+        '(вміст недоступний — повідомлення не було в кеші)';
       const attachments =
         [...(message.attachments?.values?.() || [])].map((a) => a.url) ||
         cached?.attachments ||
@@ -153,7 +153,7 @@ function registerAuditLogs(client) {
           name: 'Автор',
           value: author
             ? `${author} (\`${author.tag || author.id}\`)`
-            : 'неизвестно',
+            : 'невідомо',
           inline: true,
         },
         {
@@ -161,18 +161,18 @@ function registerAuditLogs(client) {
           value: message.channel ? `${message.channel}` : `<#${message.channelId}>`,
           inline: true,
         },
-        { name: 'Содержимое', value: truncate(content) },
+        { name: 'Вміст', value: truncate(content) },
       ];
       if (executor && executor.id !== botId()) {
-        fields.push({ name: 'Удалил', value: `${executor} (\`${executor.tag}\`)`, inline: true });
+        fields.push({ name: 'Видалив', value: `${executor} (\`${executor.tag}\`)`, inline: true });
       }
       if (attachments.length) {
-        fields.push({ name: 'Вложения', value: truncate(attachments.join('\n')) });
+        fields.push({ name: 'Вкладення', value: truncate(attachments.join('\n')) });
       }
 
       await sendServerLog(guild, {
         category: 'message',
-        title: 'Сообщение удалено',
+        title: 'Повідомлення видалено',
         color: BRAND.danger,
         fields,
         footer: `ID: ${message.id}`,
@@ -196,14 +196,14 @@ function registerAuditLogs(client) {
 
       await sendServerLog(guild, {
         category: 'message',
-        title: 'Массовое удаление сообщений',
+        title: 'Масове видалення повідомлень',
         color: BRAND.danger,
         fields: [
           { name: 'Канал', value: `${channel}`, inline: true },
-          { name: 'Количество', value: String(messages.size), inline: true },
+          { name: 'Кількість', value: String(messages.size), inline: true },
           {
-            name: 'Кто удалил',
-            value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно',
+            name: 'Хто видалив',
+            value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо',
           },
         ],
       });
@@ -222,7 +222,7 @@ function registerAuditLogs(client) {
       const oldCh = oldState.channel;
       const newCh = newState.channel;
 
-      // Пропускаем только вход/выход из hub, перемещения логируем
+      // Пропускаємо лише вхід/вихід із hub, переміщення логуємо
       const hubJoin = hubId && !oldCh && newCh?.id === hubId;
       const hubLeave = hubId && oldCh?.id === hubId && !newCh;
 
@@ -230,40 +230,40 @@ function registerAuditLogs(client) {
         if (!oldCh && newCh) {
           await sendServerLog(guild, {
             category: 'member',
-            title: 'Войс: вход',
+            title: 'Голос: вхід',
             color: BRAND.success,
             fields: [
-              { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+              { name: 'Учасник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
               { name: 'Канал', value: channelLabel(newCh), inline: true },
             ],
           });
         } else if (oldCh && !newCh) {
           await sendServerLog(guild, {
             category: 'member',
-            title: 'Войс: выход',
+            title: 'Голос: вихід',
             color: BRAND.danger,
             fields: [
-              { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+              { name: 'Учасник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
               { name: 'Канал', value: channelLabel(oldCh), inline: true },
             ],
           });
         } else if (oldCh && newCh && oldCh.id !== newCh.id) {
           if (consumeAction(`voicemove:${guild.id}:${member.id}`)) {
-            // temp voice / afk / moveall уже залогировали или не нужны
+            // temp voice / afk / moveall вже залогували або не потрібні
           } else {
             const mover = await findAuditExecutor(guild, AuditLogEvent.MemberMove, member.id);
             if (!(mover && botId() && mover.id === botId())) {
               const fields = [
-                { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
-                { name: 'Откуда', value: channelLabel(oldCh), inline: true },
-                { name: 'Куда', value: channelLabel(newCh), inline: true },
+                { name: 'Учасник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+                { name: 'Звідки', value: channelLabel(oldCh), inline: true },
+                { name: 'Куди', value: channelLabel(newCh), inline: true },
               ];
               if (mover && mover.id !== member.id) {
-                fields.push({ name: 'Переместил', value: `${mover} (\`${mover.tag}\`)` });
+                fields.push({ name: 'Перемістив', value: `${mover} (\`${mover.tag}\`)` });
               }
               await sendServerLog(guild, {
                 category: 'member',
-                title: 'Войс: перемещение',
+                title: 'Голос: переміщення',
                 color: BRAND.warn,
                 fields,
               });
@@ -274,10 +274,10 @@ function registerAuditLogs(client) {
 
       const voiceFlags = [];
       if (oldState.serverMute !== newState.serverMute) {
-        voiceFlags.push(newState.serverMute ? 'серверный мут включён' : 'серверный мут снят');
+        voiceFlags.push(newState.serverMute ? 'серверний мут увімкнено' : 'серверний мут знято');
       }
       if (oldState.serverDeaf !== newState.serverDeaf) {
-        voiceFlags.push(newState.serverDeaf ? 'серверный deaf включён' : 'серверный deaf снят');
+        voiceFlags.push(newState.serverDeaf ? 'серверний deaf увімкнено' : 'серверний deaf знято');
       }
 
       if (voiceFlags.length) {
@@ -285,17 +285,17 @@ function registerAuditLogs(client) {
         if (executor && botId() && executor.id === botId()) return;
 
         const fields = [
-          { name: 'Участник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+          { name: 'Учасник', value: `${member} (\`${member.user.tag}\`)`, inline: true },
           { name: 'Канал', value: channelLabel(newCh || oldCh), inline: true },
-          { name: 'Изменения', value: voiceFlags.map((f) => `• ${f}`).join('\n') },
+          { name: 'Зміни', value: voiceFlags.map((f) => `• ${f}`).join('\n') },
         ];
         if (executor) {
-          fields.push({ name: 'Кто изменил', value: `${executor} (\`${executor.tag}\`)` });
+          fields.push({ name: 'Хто змінив', value: `${executor} (\`${executor.tag}\`)` });
         }
 
         await sendServerLog(guild, {
           category: 'member',
-          title: 'Войс: статус',
+          title: 'Голос: статус',
           color: BRAND.soft,
           fields,
         });
@@ -309,12 +309,12 @@ function registerAuditLogs(client) {
     try {
       await sendServerLog(member.guild, {
         category: 'member',
-        title: 'Участник зашёл на сервер',
+        title: 'Учасник зайшов на сервер',
         color: BRAND.success,
         fields: [
-          { name: 'Пользователь', value: `${member} (\`${member.user.tag}\`)`, inline: true },
-          { name: 'Аккаунт создан', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
-          { name: 'Участников', value: String(member.guild.memberCount), inline: true },
+          { name: 'Користувач', value: `${member} (\`${member.user.tag}\`)`, inline: true },
+          { name: 'Акаунт створено', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+          { name: 'Учасників', value: String(member.guild.memberCount), inline: true },
         ],
         footer: `ID: ${member.id}`,
       });
@@ -325,7 +325,7 @@ function registerAuditLogs(client) {
 
   client.on(Events.GuildMemberRemove, async (member) => {
     try {
-      // Уже залогировано командой /ban /kick или будет GuildBanAdd
+      // Вже залоговано командою /ban /kick або буде GuildBanAdd
       if (consumeAction(`leave:${member.guild.id}:${member.id}`)) return;
       if (hasAction(`ban:${member.guild.id}:${member.id}`)) return;
 
@@ -343,7 +343,7 @@ function registerAuditLogs(client) {
       const executor = await findAuditExecutor(member.guild, AuditLogEvent.MemberKick, member.id);
       const fields = [
         {
-          name: 'Пользователь',
+          name: 'Користувач',
           value: `${member.user?.tag || member.id} (\`${member.id}\`)`,
         },
       ];
@@ -353,7 +353,7 @@ function registerAuditLogs(client) {
 
       await sendServerLog(member.guild, {
         category: 'member',
-        title: executor ? 'Участник кикнут' : 'Участник вышел',
+        title: executor ? 'Учасника кікнуто' : 'Учасник вийшов',
         color: BRAND.danger,
         fields,
         footer: `ID: ${member.id}`,
@@ -372,16 +372,16 @@ function registerAuditLogs(client) {
           newMember.id,
         );
         const fields = [
-          { name: 'Участник', value: `${newMember} (\`${newMember.user.tag}\`)` },
-          { name: 'Было', value: oldMember.nickname || '—', inline: true },
+          { name: 'Учасник', value: `${newMember} (\`${newMember.user.tag}\`)` },
+          { name: 'Було', value: oldMember.nickname || '—', inline: true },
           { name: 'Стало', value: newMember.nickname || '—', inline: true },
         ];
         if (executor) {
-          fields.push({ name: 'Кто изменил', value: `${executor} (\`${executor.tag}\`)` });
+          fields.push({ name: 'Хто змінив', value: `${executor} (\`${executor.tag}\`)` });
         }
         await sendServerLog(newMember.guild, {
           category: 'member',
-          title: 'Никнейм изменён',
+          title: 'Нікнейм змінено',
           color: BRAND.warn,
           fields,
           footer: `ID: ${newMember.id}`,
@@ -393,36 +393,36 @@ function registerAuditLogs(client) {
 
       if (added.size || removed.size) {
         if (consumeAction(`roles:${newMember.guild.id}:${newMember.id}`)) {
-          // автороль / level / self-role — без дубля
+          // авторола / level / self-role — без дубля
         } else {
           const executor = await findAuditExecutor(
             newMember.guild,
             AuditLogEvent.MemberRoleUpdate,
             newMember.id,
           );
-          // Роли, которые выдал сам бот, уже отражены в других логах/командах
+          // Ролі, які видав сам бот, вже відображені в інших логах/командах
           if (!(executor && botId() && executor.id === botId())) {
             const fields = [
-              { name: 'Участник', value: `${newMember} (\`${newMember.user.tag}\`)` },
+              { name: 'Учасник', value: `${newMember} (\`${newMember.user.tag}\`)` },
             ];
             if (added.size) {
               fields.push({
-                name: 'Выданы',
+                name: 'Видано',
                 value: truncate([...added.values()].map((r) => `${r}`).join(', ')),
               });
             }
             if (removed.size) {
               fields.push({
-                name: 'Сняты',
+                name: 'Знято',
                 value: truncate([...removed.values()].map((r) => `${r}`).join(', ')),
               });
             }
             if (executor) {
-              fields.push({ name: 'Кто изменил', value: `${executor} (\`${executor.tag}\`)` });
+              fields.push({ name: 'Хто змінив', value: `${executor} (\`${executor.tag}\`)` });
             }
             await sendServerLog(newMember.guild, {
               category: 'role',
-              title: 'Роли участника изменены',
+              title: 'Ролі учасника змінено',
               color: BRAND.soft,
               fields,
               footer: `ID: ${newMember.id}`,
@@ -432,7 +432,7 @@ function registerAuditLogs(client) {
       }
 
       if (oldMember.communicationDisabledUntilTimestamp !== newMember.communicationDisabledUntilTimestamp) {
-        // автомод уже залогировал
+        // автомод вже залогував
         if (consumeAction(`timeout:${newMember.guild.id}:${newMember.id}`)) return;
 
         const executor = await findAuditExecutor(
@@ -442,12 +442,12 @@ function registerAuditLogs(client) {
         );
         const active = Boolean(newMember.communicationDisabledUntilTimestamp);
         const fields = [
-          { name: 'Участник', value: `${newMember} (\`${newMember.user.tag}\`)` },
+          { name: 'Учасник', value: `${newMember} (\`${newMember.user.tag}\`)` },
           {
             name: 'Timeout',
             value: active
               ? `до <t:${Math.floor(newMember.communicationDisabledUntilTimestamp / 1000)}:F>`
-              : 'снят',
+              : 'знято',
           },
         ];
         if (executor) {
@@ -455,7 +455,7 @@ function registerAuditLogs(client) {
         }
         await sendServerLog(newMember.guild, {
           category: 'member',
-          title: active ? 'Timeout выдан' : 'Timeout снят',
+          title: active ? 'Timeout видано' : 'Timeout знято',
           color: active ? BRAND.warn : BRAND.success,
           fields,
           footer: `ID: ${newMember.id}`,
@@ -468,7 +468,7 @@ function registerAuditLogs(client) {
 
   client.on(Events.GuildBanAdd, async (ban) => {
     try {
-      // softban уже написал mod-лог
+      // softban вже написав mod-лог
       if (consumeAction(`modlog:ban:${ban.guild.id}:${ban.user.id}`)) return;
 
       const entry = await findAuditEntry(ban.guild, AuditLogEvent.MemberBanAdd, ban.user.id);
@@ -480,9 +480,9 @@ function registerAuditLogs(client) {
         title: 'Бан',
         color: BRAND.danger,
         fields: [
-          { name: 'Пользователь', value: `${ban.user} (\`${ban.user.tag}\`)` },
-          { name: 'Модератор', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
-          { name: 'Причина', value: reason || 'не указана' },
+          { name: 'Користувач', value: `${ban.user} (\`${ban.user.tag}\`)` },
+          { name: 'Модератор', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
+          { name: 'Причина', value: reason || 'не вказана' },
         ],
         footer: `ID: ${ban.user.id}`,
       });
@@ -501,11 +501,11 @@ function registerAuditLogs(client) {
 
       await sendServerLog(ban.guild, {
         category: 'member',
-        title: 'Разбан',
+        title: 'Розбан',
         color: BRAND.success,
         fields: [
-          { name: 'Пользователь', value: `${ban.user} (\`${ban.user.tag}\`)` },
-          { name: 'Модератор', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Користувач', value: `${ban.user} (\`${ban.user.tag}\`)` },
+          { name: 'Модератор', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${ban.user.id}`,
       });
@@ -523,18 +523,18 @@ function registerAuditLogs(client) {
 
       const typeName =
         channel.type === ChannelType.GuildCategory
-          ? 'Категория'
+          ? 'Категорія'
           : channel.isVoiceBased?.()
-            ? 'Голосовой канал'
-            : 'Текстовый канал';
+            ? 'Голосовий канал'
+            : 'Текстовий канал';
 
       await sendServerLog(channel.guild, {
         category: 'server',
-        title: `${typeName} создан`,
+        title: `${typeName} створено`,
         color: BRAND.success,
         fields: [
-          { name: 'Название', value: channelLabel(channel) },
-          { name: 'Кто создал', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Назва', value: channelLabel(channel) },
+          { name: 'Хто створив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${channel.id}`,
       });
@@ -552,18 +552,18 @@ function registerAuditLogs(client) {
 
       const typeName =
         channel.type === ChannelType.GuildCategory
-          ? 'Категория'
+          ? 'Категорія'
           : channel.isVoiceBased?.()
-            ? 'Голосовой канал'
+            ? 'Голосовий канал'
             : 'Канал';
 
       await sendServerLog(channel.guild, {
         category: 'server',
-        title: `${typeName} удалён`,
+        title: `${typeName} видалено`,
         color: BRAND.danger,
         fields: [
-          { name: 'Название', value: `**${channel.name}**` },
-          { name: 'Кто удалил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Назва', value: `**${channel.name}**` },
+          { name: 'Хто видалив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${channel.id}`,
       });
@@ -579,10 +579,10 @@ function registerAuditLogs(client) {
 
       const changes = [];
       if (oldChannel.name !== newChannel.name) {
-        changes.push(`имя: **${oldChannel.name}** → **${newChannel.name}**`);
+        changes.push(`назва: **${oldChannel.name}** → **${newChannel.name}**`);
       }
       if ('topic' in oldChannel && oldChannel.topic !== newChannel.topic) {
-        changes.push(`описание: ${truncate(oldChannel.topic || '—')} → ${truncate(newChannel.topic || '—')}`);
+        changes.push(`опис: ${truncate(oldChannel.topic || '—')} → ${truncate(newChannel.topic || '—')}`);
       }
       if ('nsfw' in oldChannel && oldChannel.nsfw !== newChannel.nsfw) {
         changes.push(`NSFW: ${oldChannel.nsfw} → ${newChannel.nsfw}`);
@@ -594,11 +594,11 @@ function registerAuditLogs(client) {
         changes.push(`bitrate: ${oldChannel.bitrate} → ${newChannel.bitrate}`);
       }
       if ('userLimit' in oldChannel && oldChannel.userLimit !== newChannel.userLimit) {
-        changes.push(`лимит: ${oldChannel.userLimit} → ${newChannel.userLimit}`);
+        changes.push(`ліміт: ${oldChannel.userLimit} → ${newChannel.userLimit}`);
       }
       if (oldChannel.parentId !== newChannel.parentId) {
         changes.push(
-          `категория: ${oldChannel.parent?.name || '—'} → ${newChannel.parent?.name || '—'}`,
+          `категорія: ${oldChannel.parent?.name || '—'} → ${newChannel.parent?.name || '—'}`,
         );
       }
       if (!changes.length) return;
@@ -608,12 +608,12 @@ function registerAuditLogs(client) {
 
       await sendServerLog(newChannel.guild, {
         category: 'server',
-        title: 'Канал изменён',
+        title: 'Канал змінено',
         color: BRAND.warn,
         fields: [
           { name: 'Канал', value: channelLabel(newChannel) },
-          { name: 'Изменения', value: changes.map((c) => `• ${c}`).join('\n') },
-          { name: 'Кто изменил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Зміни', value: changes.map((c) => `• ${c}`).join('\n') },
+          { name: 'Хто змінив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${newChannel.id}`,
       });
@@ -627,11 +627,11 @@ function registerAuditLogs(client) {
       const executor = await findAuditExecutor(role.guild, AuditLogEvent.RoleCreate, role.id);
       await sendServerLog(role.guild, {
         category: 'role',
-        title: 'Роль создана',
+        title: 'Роль створено',
         color: BRAND.success,
         fields: [
           { name: 'Роль', value: `${role} (\`${role.name}\`)` },
-          { name: 'Кто создал', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Хто створив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${role.id}`,
       });
@@ -645,11 +645,11 @@ function registerAuditLogs(client) {
       const executor = await findAuditExecutor(role.guild, AuditLogEvent.RoleDelete, role.id);
       await sendServerLog(role.guild, {
         category: 'role',
-        title: 'Роль удалена',
+        title: 'Роль видалено',
         color: BRAND.danger,
         fields: [
           { name: 'Роль', value: `**${role.name}**` },
-          { name: 'Кто удалил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Хто видалив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${role.id}`,
       });
@@ -661,26 +661,26 @@ function registerAuditLogs(client) {
   client.on(Events.GuildRoleUpdate, async (oldRole, newRole) => {
     try {
       const changes = [];
-      if (oldRole.name !== newRole.name) changes.push(`имя: **${oldRole.name}** → **${newRole.name}**`);
-      if (oldRole.hexColor !== newRole.hexColor) changes.push(`цвет: ${oldRole.hexColor} → ${newRole.hexColor}`);
-      if (oldRole.hoist !== newRole.hoist) changes.push(`отдельно: ${oldRole.hoist} → ${newRole.hoist}`);
+      if (oldRole.name !== newRole.name) changes.push(`назва: **${oldRole.name}** → **${newRole.name}**`);
+      if (oldRole.hexColor !== newRole.hexColor) changes.push(`колір: ${oldRole.hexColor} → ${newRole.hexColor}`);
+      if (oldRole.hoist !== newRole.hoist) changes.push(`окремо: ${oldRole.hoist} → ${newRole.hoist}`);
       if (oldRole.mentionable !== newRole.mentionable) {
-        changes.push(`упоминаемая: ${oldRole.mentionable} → ${newRole.mentionable}`);
+        changes.push(`згадувана: ${oldRole.mentionable} → ${newRole.mentionable}`);
       }
       if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
-        changes.push('права роли изменены');
+        changes.push('права ролі змінено');
       }
       if (!changes.length) return;
 
       const executor = await findAuditExecutor(newRole.guild, AuditLogEvent.RoleUpdate, newRole.id);
       await sendServerLog(newRole.guild, {
         category: 'role',
-        title: 'Роль изменена',
+        title: 'Роль змінено',
         color: BRAND.warn,
         fields: [
           { name: 'Роль', value: `${newRole}` },
-          { name: 'Изменения', value: changes.map((c) => `• ${c}`).join('\n') },
-          { name: 'Кто изменил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Зміни', value: changes.map((c) => `• ${c}`).join('\n') },
+          { name: 'Хто змінив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
         footer: `ID: ${newRole.id}`,
       });
@@ -694,14 +694,14 @@ function registerAuditLogs(client) {
       if (!invite.guild) return;
       await sendServerLog(invite.guild, {
         category: 'server',
-        title: 'Инвайт создан',
+        title: 'Інвайт створено',
         color: BRAND.success,
         fields: [
           { name: 'Код', value: invite.code, inline: true },
           { name: 'Канал', value: invite.channel ? `${invite.channel}` : '—', inline: true },
-          { name: 'Кто создал', value: invite.inviter ? `${invite.inviter} (\`${invite.inviter.tag}\`)` : 'неизвестно' },
-          { name: 'Макс. использований', value: String(invite.maxUses || '∞'), inline: true },
-          { name: 'Срок', value: invite.maxAge ? `${invite.maxAge}s` : 'бессрочно', inline: true },
+          { name: 'Хто створив', value: invite.inviter ? `${invite.inviter} (\`${invite.inviter.tag}\`)` : 'невідомо' },
+          { name: 'Макс. використань', value: String(invite.maxUses || '∞'), inline: true },
+          { name: 'Термін', value: invite.maxAge ? `${invite.maxAge}s` : 'безстроково', inline: true },
         ],
       });
     } catch (error) {
@@ -714,7 +714,7 @@ function registerAuditLogs(client) {
       if (!invite.guild) return;
       await sendServerLog(invite.guild, {
         category: 'server',
-        title: 'Инвайт удалён',
+        title: 'Інвайт видалено',
         color: BRAND.danger,
         fields: [
           { name: 'Код', value: invite.code },
@@ -731,11 +731,11 @@ function registerAuditLogs(client) {
       const executor = await findAuditExecutor(emoji.guild, AuditLogEvent.EmojiCreate, emoji.id);
       await sendServerLog(emoji.guild, {
         category: 'server',
-        title: 'Эмодзи добавлен',
+        title: 'Емодзі додано',
         color: BRAND.success,
         fields: [
-          { name: 'Эмодзи', value: `${emoji} \`:${emoji.name}:\`` },
-          { name: 'Кто добавил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Емодзі', value: `${emoji} \`:${emoji.name}:\`` },
+          { name: 'Хто додав', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
       });
     } catch (error) {
@@ -748,11 +748,11 @@ function registerAuditLogs(client) {
       const executor = await findAuditExecutor(emoji.guild, AuditLogEvent.EmojiDelete, emoji.id);
       await sendServerLog(emoji.guild, {
         category: 'server',
-        title: 'Эмодзи удалён',
+        title: 'Емодзі видалено',
         color: BRAND.danger,
         fields: [
-          { name: 'Имя', value: `:${emoji.name}:` },
-          { name: 'Кто удалил', value: executor ? `${executor} (\`${executor.tag}\`)` : 'неизвестно' },
+          { name: 'Ім\'я', value: `:${emoji.name}:` },
+          { name: 'Хто видалив', value: executor ? `${executor} (\`${executor.tag}\`)` : 'невідомо' },
         ],
       });
     } catch (error) {
@@ -765,12 +765,12 @@ function registerAuditLogs(client) {
       if (!thread.guild || isLogChannel(thread.parentId)) return;
       await sendServerLog(thread.guild, {
         category: 'server',
-        title: 'Ветка создана',
+        title: 'Гілку створено',
         color: BRAND.success,
         fields: [
-          { name: 'Ветка', value: `${thread}` },
+          { name: 'Гілка', value: `${thread}` },
           { name: 'Канал', value: thread.parent ? `${thread.parent}` : '—' },
-          { name: 'Автор', value: thread.ownerId ? `<@${thread.ownerId}>` : 'неизвестно' },
+          { name: 'Автор', value: thread.ownerId ? `<@${thread.ownerId}>` : 'невідомо' },
         ],
       });
     } catch (error) {
@@ -783,10 +783,10 @@ function registerAuditLogs(client) {
       if (!thread.guild) return;
       await sendServerLog(thread.guild, {
         category: 'server',
-        title: 'Ветка удалена',
+        title: 'Гілку видалено',
         color: BRAND.danger,
         fields: [
-          { name: 'Название', value: `**${thread.name}**` },
+          { name: 'Назва', value: `**${thread.name}**` },
           { name: 'Канал', value: thread.parentId ? `<#${thread.parentId}>` : '—' },
         ],
       });
@@ -806,7 +806,7 @@ function registerAuditLogs(client) {
       for (const [key, label] of categories) {
         const channel = await getLogChannel(guild, key);
         if (!channel) {
-          console.warn(`[logs] ${guild.name}: не задан/не найден канал для ${label}`);
+          console.warn(`[logs] ${guild.name}: не задано/не знайдено канал для ${label}`);
         } else {
           console.log(`[logs] ${label} → #${channel.name} (${channel.id}) @ ${guild.name}`);
         }

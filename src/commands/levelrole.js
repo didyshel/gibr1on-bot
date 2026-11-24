@@ -12,21 +12,21 @@ const { isDangerousRole } = require('../utils/security');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('levelrole')
-    .setDescription('Роли за уровни / активность')
+    .setDescription('Ролі за рівні / активність')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .addSubcommand((sub) =>
       sub
         .setName('setup')
-        .setDescription('Создать русские роли активности и привязать к уровням'),
+        .setDescription('Створити українські ролі активності та прив\'язати до рівнів'),
     )
     .addSubcommand((sub) =>
       sub
         .setName('set')
-        .setDescription('Привязать роль к уровню')
+        .setDescription('Прив\'язати роль до рівня')
         .addIntegerOption((opt) =>
           opt
             .setName('level')
-            .setDescription('Уровень')
+            .setDescription('Рівень')
             .setRequired(true)
             .setMinValue(1)
             .setMaxValue(500),
@@ -38,13 +38,13 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('remove')
-        .setDescription('Убрать роль за уровень')
+        .setDescription('Прибрати роль за рівень')
         .addIntegerOption((opt) =>
-          opt.setName('level').setDescription('Уровень').setRequired(true).setMinValue(1),
+          opt.setName('level').setDescription('Рівень').setRequired(true).setMinValue(1),
         ),
     )
     .addSubcommand((sub) =>
-      sub.setName('list').setDescription('Список ролей за уровни'),
+      sub.setName('list').setDescription('Список ролей за рівні'),
     ),
 
   async execute(interaction) {
@@ -53,7 +53,7 @@ module.exports = {
     if (sub === 'setup') {
       const me = interaction.guild.members.me;
       if (!me?.permissions?.has(PermissionFlagsBits.ManageRoles)) {
-        return interaction.reply(errorReply('мне нужно право Manage Roles'));
+        return interaction.reply(errorReply('мені потрібне право Manage Roles'));
       }
 
       await interaction.deferReply({ ephemeral: true });
@@ -73,7 +73,7 @@ module.exports = {
               color: def.color,
               hoist: def.hoist,
               mentionable: false,
-              reason: 'levelrole setup · активность',
+              reason: 'levelrole setup · активність',
             })
             .catch((err) => {
               console.error('levelrole create:', err);
@@ -84,18 +84,18 @@ module.exports = {
             .edit({
               color: def.color,
               hoist: def.hoist,
-              reason: 'levelrole setup · обновить цвет',
+              reason: 'levelrole setup · оновити колір',
             })
             .catch(() => null);
         }
 
         if (!role) {
-          lines.push(`lvl **${def.level}** · \`${def.name}\` — ошибка создания`);
+          lines.push(`lvl **${def.level}** · \`${def.name}\` — помилка створення`);
           continue;
         }
 
         if (role.position >= me.roles.highest.position) {
-          lines.push(`lvl **${def.level}** · ${role} — роль выше бота, привязка пропущена`);
+          lines.push(`lvl **${def.level}** · ${role} — роль вища за бота, прив'язку пропущено`);
           continue;
         }
 
@@ -112,11 +112,11 @@ module.exports = {
           successEmbed({
             title: 'levelrole · setup',
             description: [
-              'роли активности готовы',
+              'ролі активності готові',
               '',
               ...lines,
               '',
-              'xp: сообщения + войс (не соло, не AFK)',
+              'xp: повідомлення + войс (не соло, не AFK)',
               '`/level` · `/leaderboard`',
             ].join('\n'),
           }),
@@ -132,7 +132,7 @@ module.exports = {
           embeds: [
             infoEmbed({
               title: 'levelrole',
-              description: 'ролей нет · `/levelrole setup`',
+              description: 'ролей немає · `/levelrole setup`',
             }),
           ],
           ephemeral: true,
@@ -153,7 +153,7 @@ module.exports = {
       const level = interaction.options.getInteger('level', true);
       removeLevelRole(interaction.guildId, level);
       return interaction.reply({
-        embeds: [successEmbed({ title: 'levelrole', description: `lvl ${level} снят` })],
+        embeds: [successEmbed({ title: 'levelrole', description: `lvl ${level} знято` })],
         ephemeral: true,
       });
     }
@@ -161,11 +161,11 @@ module.exports = {
     const level = interaction.options.getInteger('level', true);
     const role = interaction.options.getRole('role', true);
     if (isDangerousRole(role)) {
-      return interaction.reply(errorReply('роль слишком мощная'));
+      return interaction.reply(errorReply('роль надто потужна'));
     }
     const me = interaction.guild.members.me;
     if (me && role.position >= me.roles.highest.position) {
-      return interaction.reply(errorReply('роль бота ниже этой роли'));
+      return interaction.reply(errorReply('роль бота нижча за цю роль'));
     }
 
     setLevelRole(interaction.guildId, level, role.id);

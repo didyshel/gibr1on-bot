@@ -3,12 +3,25 @@ const { isInfoUserChannel } = require('./userInfoChannel');
 const { isLogChannelId } = require('../utils/config');
 const { isAllowedGuild } = require('../utils/security');
 
+// \b не працює з кирилицею, тому межі слів задаємо через Unicode-властивості
+const L = '(?<![\\p{L}\\p{N}_])';
+const R = '(?![\\p{L}\\p{N}_])';
+const re = (body) => new RegExp(`${L}(?:${body})${R}`, 'iu');
+
 const EGGS = [
-  { test: (t) => /\bпинг\b/i.test(t), reply: 'Понг. Я на связи.' },
-  { test: (t) => /\bбот\s*живой\b/i.test(t), reply: 'Живее всех живых.' },
-  { test: (t) => /\bgibr1on\b/i.test(t), reply: 'gibr1on на месте.' },
-  { test: (t) => /доброе\s*утро/i.test(t), reply: 'Доброе! Пусть день будет спокойным.' },
-  { test: (t) => /спокойной\s*ночи/i.test(t), reply: 'Спокойной ночи. Я остаюсь на страже логов.' },
+  { test: (t) => re('пінг|пинг').test(t), reply: 'Понг. Я на зв’язку.' },
+  { test: (t) => re('бот\\s*(?:живий|живой)').test(t), reply: 'Живіший за всіх живих.' },
+  { test: (t) => /\bgibr1on\b/i.test(t), reply: 'gibr1on на місці.' },
+  {
+    test: (t) =>
+      re('добр(?:е|ий)\\s*ранок|доброго\\s*ранку|доброе\\s*утро').test(t),
+    reply: 'Добрий ранок! Нехай день буде спокійним.',
+  },
+  {
+    test: (t) =>
+      re('спокійної\\s*ночі|на\\s*добраніч|добраніч|спокойной\\s*ночи').test(t),
+    reply: 'Спокійної ночі. Я залишаюсь на варті логів.',
+  },
 ];
 
 function registerEasterEggs(client) {

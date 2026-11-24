@@ -10,30 +10,30 @@ const { infoEmbed, successEmbed, errorReply, BRAND } = require('../utils/style')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('remind')
-    .setDescription('Напоминания')
+    .setDescription('Нагадування')
     .addSubcommand((sub) =>
       sub
         .setName('add')
-        .setDescription('Поставить напоминание')
+        .setDescription('Поставити нагадування')
         .addStringOption((opt) =>
           opt
             .setName('time')
-            .setDescription('Через сколько: 30m, 2h, 1d')
+            .setDescription('Через скільки: 30m, 2h, 1d')
             .setRequired(true),
         )
         .addStringOption((opt) =>
-          opt.setName('text').setDescription('О чём напомнить').setRequired(true),
+          opt.setName('text').setDescription('Про що нагадати').setRequired(true),
         ),
     )
     .addSubcommand((sub) =>
-      sub.setName('list').setDescription('Твои активные напоминания'),
+      sub.setName('list').setDescription('Твої активні нагадування'),
     )
     .addSubcommand((sub) =>
       sub
         .setName('cancel')
-        .setDescription('Отменить напоминание')
+        .setDescription('Скасувати нагадування')
         .addStringOption((opt) =>
-          opt.setName('id').setDescription('ID из /remind list').setRequired(true),
+          opt.setName('id').setDescription('ID з /remind list').setRequired(true),
         ),
     ),
 
@@ -47,7 +47,7 @@ module.exports = {
 
       if (!ms) {
         return interaction.reply(
-          errorReply('формат: `10m` · `2h` · `1d` (от 10с до 30д)'),
+          errorReply('формат: `10m` · `2h` · `1d` (від 10с до 30д)'),
         );
       }
 
@@ -69,7 +69,7 @@ module.exports = {
             color: BRAND.glow,
             description: text,
             fields: [
-              { name: 'когда', value: `<t:${Math.floor(at / 1000)}:R>`, inline: true },
+              { name: 'коли', value: `<t:${Math.floor(at / 1000)}:R>`, inline: true },
               { name: 'id', value: `\`${id}\``, inline: true },
             ],
           }),
@@ -84,7 +84,7 @@ module.exports = {
           embeds: [
             infoEmbed({
               title: 'remind · list',
-              description: 'нет активных напоминаний · `/remind add`',
+              description: 'немає активних нагадувань · `/remind add`',
             }),
           ],
           ephemeral: true,
@@ -113,7 +113,7 @@ module.exports = {
       const id = interaction.options.getString('id', true).trim();
       const removed = cancelReminder(interaction.user.id, id);
       if (!removed) {
-        return interaction.reply(errorReply('напоминание не найдено (или не твоё)'));
+        return interaction.reply(errorReply('нагадування не знайдено (або не твоє)'));
       }
 
       return interaction.reply({

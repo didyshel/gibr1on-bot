@@ -6,15 +6,15 @@ const { createCase, formatCaseId } = require('../utils/cases');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('timeout')
-    .setDescription('Замутить участника (timeout)')
+    .setDescription('Замутити учасника (timeout)')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption((opt) =>
-      opt.setName('user').setDescription('Кого замутить').setRequired(true),
+      opt.setName('user').setDescription('Кого замутити').setRequired(true),
     )
     .addIntegerOption((opt) =>
       opt
         .setName('minutes')
-        .setDescription('На сколько минут (1–40320, 0 = снять)')
+        .setDescription('На скільки хвилин (1–40320, 0 = зняти)')
         .setRequired(true)
         .setMinValue(0)
         .setMaxValue(40320),
@@ -27,11 +27,11 @@ module.exports = {
     const targetUser = interaction.options.getUser('user', true);
     const minutes = interaction.options.getInteger('minutes', true);
     const reason =
-      interaction.options.getString('reason') || 'не указана';
+      interaction.options.getString('reason') || 'не вказана';
 
     const target = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
     if (!target) {
-      return interaction.reply(errorReply('участник не на сервере'));
+      return interaction.reply(errorReply('учасника немає на сервері'));
     }
 
     const check = canModerate(interaction.member, target);
@@ -54,14 +54,14 @@ module.exports = {
       await interaction.reply({
         embeds: [
           successEmbed({
-            title: 'timeout · снят',
+            title: 'timeout · знято',
             thumbnail: targetUser.displayAvatarURL({ size: 256 }),
             author: {
               name: interaction.user.tag,
               iconURL: interaction.user.displayAvatarURL({ size: 64 }),
             },
             fields: [
-              { name: 'участник', value: `${targetUser}`, inline: true },
+              { name: 'учасник', value: `${targetUser}`, inline: true },
               { name: 'case', value: `\`${caseLabel}\``, inline: true },
               { name: 'причина', value: reason },
             ],
@@ -82,8 +82,8 @@ module.exports = {
             iconURL: interaction.user.displayAvatarURL({ size: 64 }),
           },
           fields: [
-            { name: 'участник', value: `${targetUser}`, inline: true },
-            { name: 'длительность', value: `\`${minutes} мин\``, inline: true },
+            { name: 'учасник', value: `${targetUser}`, inline: true },
+            { name: 'тривалість', value: `\`${minutes} хв\``, inline: true },
             { name: 'case', value: `\`${caseLabel}\``, inline: true },
             { name: 'причина', value: reason },
           ],

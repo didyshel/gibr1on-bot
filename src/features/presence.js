@@ -3,12 +3,12 @@ const { Events, ActivityType } = require('discord.js');
 function registerPresence(client) {
   const statuses = [
     () => ({ name: 'Nemiroff App', type: ActivityType.Watching }),
-    () => ({ name: 'семью Nemiroff', type: ActivityType.Watching }),
+    () => ({ name: 'родину Nemiroff', type: ActivityType.Watching }),
     () => ({ name: '/help · Nemiroff', type: ActivityType.Listening }),
     () => {
       const guild = client.guilds.cache.first();
       const count = guild?.memberCount ?? 0;
-      return { name: `${count} в Nemiroff`, type: ActivityType.Watching };
+      return { name: `${count} у Nemiroff`, type: ActivityType.Watching };
     },
   ];
 

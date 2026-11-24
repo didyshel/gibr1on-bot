@@ -76,8 +76,8 @@ function registerAfkDetect(client) {
           title: 'AFK detect',
           color: BRAND.soft,
           fields: [
-            { name: 'участник', value: `${member}` },
-            { name: 'куда', value: `<#${targetAfk}>` },
+            { name: 'учасник', value: `${member}` },
+            { name: 'куди', value: `<#${targetAfk}>` },
           ],
         });
       }

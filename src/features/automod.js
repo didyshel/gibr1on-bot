@@ -57,9 +57,9 @@ function findBadWord(content, words) {
 }
 
 function capsRatio(content) {
-  const letters = String(content || '').replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
+  const letters = String(content || '').replace(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ]/g, '');
   if (letters.length < automodCapsMinLen()) return 0;
-  const upper = letters.replace(/[^A-ZА-ЯЁ]/g, '').length;
+  const upper = letters.replace(/[^A-ZА-ЯЁІЇЄҐ]/g, '').length;
   return (upper / letters.length) * 100;
 }
 
@@ -72,7 +72,7 @@ async function punishDelete(message, title, extraFields = []) {
   markAction(`delmsg:${message.id}`);
   await message.delete().catch(() => null);
   const warn = await message.channel
-    .send(`${message.author}, сообщение удалено · автомод`)
+    .send(`${message.author}, повідомлення видалено · автомод`)
     .catch(() => null);
   if (warn) setTimeout(() => warn.delete().catch(() => null), 5000);
 
@@ -81,9 +81,9 @@ async function punishDelete(message, title, extraFields = []) {
     title,
     color: BRAND.warn,
     fields: [
-      { name: 'Кто', value: `${message.author} (\`${message.author.tag}\`)` },
+      { name: 'Хто', value: `${message.author} (\`${message.author.tag}\`)` },
       { name: 'Канал', value: `${message.channel}` },
-      { name: 'Сообщение', value: (message.content || '').slice(0, 500) || '—' },
+      { name: 'Повідомлення', value: (message.content || '').slice(0, 500) || '—' },
       ...extraFields,
     ],
   });
@@ -112,10 +112,10 @@ function registerAutomod(client) {
         title: 'Автомод: антирейд',
         color: BRAND.danger,
         fields: [
-          { name: 'участник', value: `${member}` },
+          { name: 'учасник', value: `${member}` },
           {
-            name: 'окно',
-            value: `${list.length}+ джойнов / ${automodRaidWindowSec()}с · timeout 10 мин`,
+            name: 'вікно',
+            value: `${list.length}+ джойнів / ${automodRaidWindowSec()}с · timeout 10 хв`,
           },
         ],
       });
@@ -137,7 +137,7 @@ function registerAutomod(client) {
       const gid = message.guild.id;
 
       if (isFeatureEnabled(gid, 'invites') && inviteRegex.test(content)) {
-        await punishDelete(message, 'Автомод: инвайт');
+        await punishDelete(message, 'Автомод: інвайт');
         return;
       }
 
@@ -154,8 +154,8 @@ function registerAutomod(client) {
       if (isFeatureEnabled(gid, 'links') && (linkRegex.test(content) || countLinks(content) > 0)) {
         const n = countLinks(content);
         if (n > automodLinksMax()) {
-          await punishDelete(message, 'Автомод: ссылки', [
-            { name: 'лимит', value: `${n} > ${automodLinksMax()}` },
+          await punishDelete(message, 'Автомод: посилання', [
+            { name: 'ліміт', value: `${n} > ${automodLinksMax()}` },
           ]);
           return;
         }
@@ -195,7 +195,7 @@ function registerAutomod(client) {
         await message.member?.timeout(60_000, 'Антиспам').catch(() => null);
 
         const warn = await message.channel
-          .send(`${message.author}, слишком быстро. Timeout 1 мин.`)
+          .send(`${message.author}, занадто швидко. Timeout 1 хв.`)
           .catch(() => null);
         if (warn) setTimeout(() => warn.delete().catch(() => null), 6000);
 
@@ -204,9 +204,9 @@ function registerAutomod(client) {
           title: 'Автомод: спам',
           color: BRAND.danger,
           fields: [
-            { name: 'Кто', value: `${message.author} (\`${message.author.tag}\`)` },
+            { name: 'Хто', value: `${message.author} (\`${message.author.tag}\`)` },
             { name: 'Канал', value: `${message.channel}` },
-            { name: 'Действие', value: 'удаление + timeout 1 мин' },
+            { name: 'Дія', value: 'видалення + timeout 1 хв' },
           ],
         });
       }

@@ -10,23 +10,23 @@ const { markAction } = require('../utils/logger');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('voice')
-    .setDescription('Голосовые утилиты')
+    .setDescription('Голосові утиліти')
     .setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
     .addSubcommand((sub) =>
       sub
         .setName('moveall')
-        .setDescription('Переместить всех из канала в другой')
+        .setDescription('Перемістити всіх з каналу в інший')
         .addChannelOption((opt) =>
           opt
             .setName('to')
-            .setDescription('Куда')
+            .setDescription('Куди')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(true),
         )
         .addChannelOption((opt) =>
           opt
             .setName('from')
-            .setDescription('Откуда (по умолчанию — твой канал)')
+            .setDescription('Звідки (за замовчуванням — твій канал)')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -34,20 +34,20 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('muteall')
-        .setDescription('Замутить / размутить всех в канале')
+        .setDescription('Замутити / розмутити всіх у каналі')
         .addBooleanOption((opt) =>
           opt.setName('mute').setDescription('true = mute').setRequired(true),
         )
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Канал (по умолчанию — твой)')
+            .setDescription('Канал (за замовчуванням — твій)')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
     )
     .addSubcommand((sub) =>
-      sub.setName('afkinfo').setDescription('Статус AFK-детекта'),
+      sub.setName('afkinfo').setDescription('Статус AFK-детекту'),
     ),
 
   async execute(interaction) {
@@ -59,11 +59,11 @@ module.exports = {
           infoEmbed({
             title: 'afk detect',
             fields: [
-              { name: 'включён', value: afkDetect() ? 'да' : 'нет', inline: true },
-              { name: 'минут', value: `\`${afkMinutes()}\``, inline: true },
+              { name: 'увімкнено', value: afkDetect() ? 'так' : 'ні', inline: true },
+              { name: 'хвилин', value: `\`${afkMinutes()}\``, inline: true },
               {
                 name: 'канал',
-                value: afkChannelId() ? `<#${afkChannelId()}>` : 'не задан · `AFK_CHANNEL_ID`',
+                value: afkChannelId() ? `<#${afkChannelId()}>` : 'не задано · `AFK_CHANNEL_ID`',
               },
             ],
           }),
@@ -77,10 +77,10 @@ module.exports = {
         interaction.options.getChannel('from') || interaction.member?.voice?.channel;
       const to = interaction.options.getChannel('to', true);
       if (!from?.isVoiceBased?.()) {
-        return interaction.reply(errorReply('укажи from или зайди в войс'));
+        return interaction.reply(errorReply('вкажи from або зайди у войс'));
       }
       if (from.id === to.id) {
-        return interaction.reply(errorReply('каналы одинаковые'));
+        return interaction.reply(errorReply('канали однакові'));
       }
 
       let moved = 0;
@@ -95,7 +95,7 @@ module.exports = {
         embeds: [
           successEmbed({
             title: 'moveall',
-            description: `перемещено **${moved}** · ${from} → ${to}`,
+            description: `переміщено **${moved}** · ${from} → ${to}`,
           }),
         ],
       });
@@ -106,7 +106,7 @@ module.exports = {
       const channel =
         interaction.options.getChannel('channel') || interaction.member?.voice?.channel;
       if (!channel?.isVoiceBased?.()) {
-        return interaction.reply(errorReply('укажи channel или зайди в войс'));
+        return interaction.reply(errorReply('вкажи channel або зайди у войс'));
       }
 
       let n = 0;
@@ -121,7 +121,7 @@ module.exports = {
         embeds: [
           successEmbed({
             title: 'muteall',
-            description: `${mute ? 'mute' : 'unmute'} · **${n}** в ${channel}`,
+            description: `${mute ? 'mute' : 'unmute'} · **${n}** у ${channel}`,
           }),
         ],
       });

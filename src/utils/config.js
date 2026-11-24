@@ -74,10 +74,10 @@ module.exports = {
   statsMembersChannelId: () => env('STATS_MEMBERS_CHANNEL_ID'),
   statsOnlineChannelId: () => env('STATS_ONLINE_CHANNEL_ID'),
   birthdayChannelId: () => env('BIRTHDAY_CHANNEL_ID') || env('WELCOME_CHANNEL_ID'),
-  /** Канал рассмотрения заявок (/apply) */
+  /** Канал розгляду заявок (/apply) */
   applyReviewChannelId: () =>
     env('APPLY_REVIEW_CHANNEL_ID') || '1554237922343911576',
-  /** Роль при принятии заявки — можно переопределить в /apply setup */
+  /** Роль при прийнятті заявки — можна перевизначити в /apply setup */
   applyAcceptRoleId: () => env('APPLY_ACCEPT_ROLE_ID'),
   automodInvites: () => envFlag('AUTOMOD_INVITES', true),
   automodSpam: () => envFlag('AUTOMOD_SPAM', true),
@@ -95,14 +95,14 @@ module.exports = {
   afkChannelId: () => env('AFK_CHANNEL_ID'),
   levelMessageXp: () => envFlag('LEVEL_MESSAGE_XP', true),
   levelVoiceXp: () => envFlag('LEVEL_VOICE_XP', true),
-  /** XP за каждую минуту в войсе (с кем-то, не AFK) */
+  /** XP за кожну хвилину у голосовому каналі (з кимось, не AFK) */
   levelVoiceXpAmount: () => envInt('LEVEL_VOICE_XP_AMOUNT', 5),
   backupEnabled: () => envFlag('BACKUP_ENABLED', true),
   backupKeepDays: () => envInt('BACKUP_KEEP_DAYS', 7),
-  /** После N варнов — timeout (0 = выкл) */
+  /** Після N варнів — timeout (0 = вимк.) */
   warnTimeoutAt: () => envInt('WARN_TIMEOUT_AT', 3),
   warnTimeoutMinutes: () => envInt('WARN_TIMEOUT_MINUTES', 60),
-  /** После N варнов — kick (0 = выкл). Имеет приоритет над timeout на том же пороге */
+  /** Після N варнів — kick (0 = вимк.). Має пріоритет над timeout на тому ж порозі */
   warnKickAt: () => envInt('WARN_KICK_AT', 5),
   guildId: () => env('GUILD_ID'),
   ownerIds: () => envList('OWNER_IDS'),

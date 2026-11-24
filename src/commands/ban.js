@@ -7,10 +7,10 @@ const { createCase, formatCaseId } = require('../utils/cases');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ban')
-    .setDescription('Забанить участника')
+    .setDescription('Забанити учасника')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption((opt) =>
-      opt.setName('user').setDescription('Кого забанить').setRequired(true),
+      opt.setName('user').setDescription('Кого забанити').setRequired(true),
     )
     .addStringOption((opt) =>
       opt.setName('reason').setDescription('Причина').setRequired(false),
@@ -18,7 +18,7 @@ module.exports = {
     .addIntegerOption((opt) =>
       opt
         .setName('delete_days')
-        .setDescription('Удалить сообщения за N дней (0–7)')
+        .setDescription('Видалити повідомлення за N днів (0–7)')
         .setMinValue(0)
         .setMaxValue(7)
         .setRequired(false),
@@ -27,7 +27,7 @@ module.exports = {
   async execute(interaction) {
     const targetUser = interaction.options.getUser('user', true);
     const reason =
-      interaction.options.getString('reason') || 'не указана';
+      interaction.options.getString('reason') || 'не вказана';
     const deleteDays = interaction.options.getInteger('delete_days') ?? 0;
 
     const target = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
@@ -47,7 +47,7 @@ module.exports = {
     });
     const caseLabel = formatCaseId(caseEntry.id);
 
-    // Только подавляем «вышел» / второй leave-лог; сам бан пишет audit-лог один раз
+    // Лише придушуємо «вийшов» / другий leave-лог; сам бан пише audit-лог один раз
     markAction(`ban:${interaction.guild.id}:${targetUser.id}`);
     markAction(`leave:${interaction.guild.id}:${targetUser.id}`);
 
@@ -67,7 +67,7 @@ module.exports = {
             iconURL: interaction.user.displayAvatarURL({ size: 64 }),
           },
           fields: [
-            { name: 'участник', value: `${targetUser}`, inline: true },
+            { name: 'учасник', value: `${targetUser}`, inline: true },
             { name: 'case', value: `\`${caseLabel}\``, inline: true },
             { name: 'id', value: `\`${targetUser.id}\``, inline: true },
             { name: 'причина', value: reason },

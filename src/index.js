@@ -21,10 +21,10 @@ if (enableLock) {
       if (oldPid && oldPid !== process.pid) {
         try {
           process.kill(oldPid, 0);
-          console.error(`Бот уже запущен (PID ${oldPid}). Останавливаю старый процесс...`);
+          console.error(`Бот уже запущено (PID ${oldPid}). Зупиняю старий процес...`);
           process.kill(oldPid);
         } catch {
-          // lock устарел
+          // lock застарів
         }
       }
     }
@@ -48,7 +48,7 @@ if (enableLock) {
       process.exit(0);
     });
   } catch (error) {
-    console.warn('Не удалось создать lock-файл:', error.message);
+    console.warn('Не вдалося створити lock-файл:', error.message);
   }
 }
 
@@ -69,13 +69,13 @@ const { markAction } = require('./utils/logger');
 const token = process.env.DISCORD_TOKEN;
 
 if (!isSafeToken(token)) {
-  console.error('[boot] Некорректный или пустой DISCORD_TOKEN (проверь Environment Variables на хостинге).');
+  console.error('[boot] Некоректний або порожній DISCORD_TOKEN (перевір Environment Variables на хостингу).');
   process.exit(1);
 }
 
 const guilds = allowedGuildIds();
 if (!guilds.length) {
-  console.error('[boot] Нет GUILD_ID / ALLOWED_GUILD_IDS в env — бот не запущен.');
+  console.error('[boot] Немає GUILD_ID / ALLOWED_GUILD_IDS в env — бот не запущено.');
   process.exit(1);
 }
 
@@ -101,7 +101,7 @@ const client = new Client({
 });
 client.setMaxListeners(30);
 
-// Heartbeat — видно, жив ли event loop на FadeHost после boot
+// Heartbeat — видно, чи живий event loop на FadeHost після boot
 client.once(Events.ClientReady, () => {
   setInterval(() => {
     try {
@@ -128,13 +128,13 @@ for (const file of commandFiles) {
       client.commands.set(command.data.name, command);
       console.log(`[boot] cmd /${command.data.name}`);
     } else {
-      console.warn(`[boot] skip ${file} · нет data/execute`);
+      console.warn(`[boot] skip ${file} · немає data/execute`);
     }
   } catch (error) {
     console.error(`[boot] FAIL cmd ${file}:`, error.message);
   }
 }
-console.log(`[boot] команд загружено: ${client.commands.size}`);
+console.log(`[boot] команд завантажено: ${client.commands.size}`);
 
 function safeRegister(name, registerFn) {
   try {
@@ -161,7 +161,7 @@ safeRegister('tempVoice', () => {
 let handleApplicationsInteraction = async (interaction) => {
   await safeRespond(
     interaction,
-    errorReply('заявки не загружены · Pull + Restart на FadeHost'),
+    errorReply('заявки не завантажено · Pull + Restart на FadeHost'),
   );
 };
 safeRegister('applications', () => {
@@ -182,9 +182,9 @@ const helpCommand = require('./commands/help');
 async function leaveIfUnauthorized(guild) {
   if (!leaveUnknownGuilds()) return;
   if (isAllowedGuild(guild.id)) return;
-  console.warn(`[security] ухожу с чужого сервера: ${guild.name} (${guild.id})`);
+  console.warn(`[security] залишаю чужий сервер: ${guild.name} (${guild.id})`);
   await guild.leave().catch((err) => {
-    console.warn(`[security] не удалось выйти из ${guild.id}:`, err.message);
+    console.warn(`[security] не вдалося вийти з ${guild.id}:`, err.message);
   });
 }
 
@@ -200,7 +200,7 @@ async function safeRespond(interaction, payload) {
   }
 }
 
-/** После defer: команды с reply()/deferReply() продолжают работать через editReply */
+/** Після defer: команди з reply()/deferReply() продовжують працювати через editReply */
 function patchDeferredInteraction(interaction) {
   const edit = interaction.editReply.bind(interaction);
   const followUp = interaction.followUp.bind(interaction);
@@ -221,28 +221,28 @@ function patchDeferredInteraction(interaction) {
 }
 
 client.once(Events.ClientReady, async (readyClient) => {
-  console.log(`[boot] онлайн как ${readyClient.user.tag}`);
+  console.log(`[boot] онлайн як ${readyClient.user.tag}`);
   console.log(`[boot] ws status: ${readyClient.ws.status}`);
-  console.log(`[security] разрешённые серверы: ${allowedGuildIds().join(', ')}`);
+  console.log(`[security] дозволені сервери: ${allowedGuildIds().join(', ')}`);
   const owners = ownerIds();
   console.log(
     owners.length
-      ? `[security] владельцы бота (топовые команды): ${owners.join(', ')}`
-      : '[security] ВНИМАНИЕ: OWNER_IDS пуст — ban/warn/automod и т.п. недоступны никому',
+      ? `[security] власники бота (топові команди): ${owners.join(', ')}`
+      : '[security] УВАГА: OWNER_IDS порожній — ban/warn/automod тощо недоступні нікому',
   );
   const roles = allowedRoleIds();
   console.log(
     roles.length
-      ? `[security] доступ по ролям: ${roles.join(', ')}`
-      : '[security] доступ по ролям: без ограничений',
+      ? `[security] доступ за ролями: ${roles.join(', ')}`
+      : '[security] доступ за ролями: без обмежень',
   );
 
   const allowed = allowedGuildIds();
   const present = [...readyClient.guilds.cache.keys()].filter((id) => allowed.includes(id));
   console.log(
     present.length
-      ? `[boot] на разрешённых серверах: ${present.join(', ')}`
-      : '[boot] ВНИМАНИЕ: бот НЕ на разрешённом сервере — проверь GUILD_ID на FadeHost',
+      ? `[boot] на дозволених серверах: ${present.join(', ')}`
+      : '[boot] УВАГА: бот НЕ на дозволеному сервері — перевір GUILD_ID на FadeHost',
   );
 
   for (const guild of readyClient.guilds.cache.values()) {
@@ -276,7 +276,7 @@ client.on(Events.GuildCreate, async (guild) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   const name = interaction.commandName || interaction.customId || String(interaction.type);
-  // Синхронно ДО любого await — иначе на FadeHost не видно, что event дошёл
+  // Синхронно ДО будь-якого await — інакше на FadeHost не видно, що event дійшов
   console.log(`[interaction] hit · ${name}`);
 
   try {
@@ -297,10 +297,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const command = client.commands.get(interaction.commandName);
       if (!command) {
-        console.warn(`[interaction] нет хендлера: /${interaction.commandName}`);
+        console.warn(`[interaction] немає хендлера: /${interaction.commandName}`);
         await interaction.editReply({
           embeds: errorReply(
-            `команда \`/${interaction.commandName}\` не загружена · Redeploy на FadeHost`,
+            `команда \`/${interaction.commandName}\` не завантажена · Redeploy на FadeHost`,
           ).embeds,
         });
         return;
@@ -354,7 +354,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const key = interaction.customId.slice('help:'.length);
       if (!['home', 'mod', 'util', 'server'].includes(key)) {
-        await safeRespond(interaction, errorReply('неизвестная страница'));
+        await safeRespond(interaction, errorReply('невідома сторінка'));
         return;
       }
 
@@ -374,35 +374,35 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const roleId = interaction.customId.slice('selfrole:'.length);
       if (!/^\d{17,20}$/.test(roleId)) {
-        await safeRespond(interaction, errorReply('некорректная роль'));
+        await safeRespond(interaction, errorReply('некоректна роль'));
         return;
       }
 
       if (!isAllowedSelfRole(interaction.guildId, roleId)) {
-        await safeRespond(interaction, errorReply('эта роль не из панели бота'));
+        await safeRespond(interaction, errorReply('ця роль не з панелі бота'));
         return;
       }
 
       const role = interaction.guild.roles.cache.get(roleId);
       if (!role) {
-        await safeRespond(interaction, errorReply('роль больше не существует'));
+        await safeRespond(interaction, errorReply('роль більше не існує'));
         return;
       }
 
       if (isDangerousRole(role)) {
-        await safeRespond(interaction, errorReply('роль слишком мощная для self-role'));
+        await safeRespond(interaction, errorReply('роль надто потужна для self-role'));
         return;
       }
 
       const me = interaction.guild.members.me;
       if (me && role.position >= me.roles.highest.position) {
-        await safeRespond(interaction, errorReply('роль бота ниже этой роли'));
+        await safeRespond(interaction, errorReply('роль бота нижча за цю роль'));
         return;
       }
 
       const member = interaction.member;
       if (!member?.roles) {
-        await safeRespond(interaction, errorReply('не удалось получить роли'));
+        await safeRespond(interaction, errorReply('не вдалося отримати ролі'));
         return;
       }
 
@@ -414,7 +414,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             infoEmbed({
               title: 'roles',
               color: BRAND.soft,
-              description: `${role} · снята`,
+              description: `${role} · знято`,
             }),
           ],
           flags: MessageFlags.Ephemeral,
@@ -428,7 +428,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         embeds: [
           infoEmbed({
             title: 'roles',
-            description: `${role} · выдана`,
+            description: `${role} · видано`,
           }),
         ],
         flags: MessageFlags.Ephemeral,
@@ -438,9 +438,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error('[interaction] error:', error);
     try {
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: errorReply('ошибка при выполнении').embeds }).catch(() => null);
+        await interaction.editReply({ embeds: errorReply('помилка під час виконання').embeds }).catch(() => null);
       } else {
-        await safeRespond(interaction, errorReply('ошибка при выполнении'));
+        await safeRespond(interaction, errorReply('помилка під час виконання'));
       }
     } catch {
       /* ignore */

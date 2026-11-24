@@ -49,15 +49,15 @@ function resolveLogChannelId(category = 'server') {
 async function getLogChannel(guild, category = 'server') {
   const channelId = resolveLogChannelId(category);
   if (!channelId) {
-    console.warn(`[logs] нет ID для категории "${category}"`);
+    console.warn(`[logs] немає ID для категорії "${category}"`);
     return null;
   }
   const channel = await guild.channels.fetch(channelId).catch((err) => {
-    console.warn(`[logs] не удалось получить канал ${channelId} (${category}):`, err.message);
+    console.warn(`[logs] не вдалося отримати канал ${channelId} (${category}):`, err.message);
     return null;
   });
   if (!channel?.isTextBased()) {
-    console.warn(`[logs] канал ${channelId} (${category}) не текстовый или не найден`);
+    console.warn(`[logs] канал ${channelId} (${category}) не текстовий або не знайдений`);
     return null;
   }
   return channel;
@@ -122,7 +122,7 @@ async function sendServerLog(
     return true;
   } catch (error) {
     console.error(
-      `[logs] не отправилось в #${channel.name} (${category}/${channel.id}):`,
+      `[logs] не надіслано в #${channel.name} (${category}/${channel.id}):`,
       error.message,
     );
     return false;

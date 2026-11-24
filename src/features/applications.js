@@ -60,12 +60,12 @@ function panelRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('apply:open')
-      .setLabel('Подать заявку')
+      .setLabel('Подати заявку')
       .setStyle(ButtonStyle.Danger),
   );
 }
 
-/** Сообщение панели: красная кнопка заявки */
+/** Повідомлення панелі: червона кнопка заявки */
 function panelPayload() {
   return { components: [panelRow()] };
 }
@@ -73,13 +73,13 @@ function panelPayload() {
 function buildApplyModal() {
   const modal = new ModalBuilder()
     .setCustomId('apply:modal')
-    .setTitle('заявка на вступление');
+    .setTitle('заявка на вступ');
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('nick')
-        .setLabel('Ник в игре')
+        .setLabel('Нік у грі')
         .setStyle(TextInputStyle.Short)
         .setMinLength(1)
         .setMaxLength(64)
@@ -88,7 +88,7 @@ function buildApplyModal() {
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('name')
-        .setLabel('Как зовут')
+        .setLabel('Як звати')
         .setStyle(TextInputStyle.Short)
         .setMinLength(1)
         .setMaxLength(64)
@@ -97,27 +97,27 @@ function buildApplyModal() {
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('age')
-        .setLabel('Возраст OOC')
+        .setLabel('Вік OOC')
         .setStyle(TextInputStyle.Short)
         .setMinLength(1)
         .setMaxLength(8)
         .setRequired(true)
-        .setPlaceholder('настоящий возраст, например 18'),
+        .setPlaceholder('справжній вік, наприклад 18'),
     ),
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('time')
-        .setLabel('Время на проекте')
+        .setLabel('Час на проєкті')
         .setStyle(TextInputStyle.Short)
         .setMinLength(1)
         .setMaxLength(100)
         .setRequired(true)
-        .setPlaceholder('например: 3 месяца'),
+        .setPlaceholder('наприклад: 3 місяці'),
     ),
     new ActionRowBuilder().addComponents(
       new TextInputBuilder()
         .setCustomId('experience')
-        .setLabel('Опыт в других семьях')
+        .setLabel('Досвід в інших сім’ях')
         .setStyle(TextInputStyle.Paragraph)
         .setMinLength(1)
         .setMaxLength(800)
@@ -132,20 +132,20 @@ function reviewButtons(userId, appId) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`apply:accept:${userId}:${appId}`)
-      .setLabel('принять')
+      .setLabel('прийняти')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`apply:reject:${userId}:${appId}`)
-      .setLabel('отклонить')
+      .setLabel('відхилити')
       .setStyle(ButtonStyle.Danger),
   );
 }
 
-function applicationEmbed(user, answers, status = 'ожидает') {
+function applicationEmbed(user, answers, status = 'очікує') {
   const color =
-    status === 'принята'
+    status === 'прийнята'
       ? BRAND.success
-      : status === 'отклонена'
+      : status === 'відхилена'
         ? BRAND.danger
         : BRAND.color;
 
@@ -163,11 +163,11 @@ function applicationEmbed(user, answers, status = 'ожидает') {
         value: user?.id ? `<@${user.id}> (\`${user.id}\`)` : '—',
         inline: false,
       },
-      { name: 'Ник в игре', value: answers.nick, inline: true },
-      { name: 'Как зовут', value: answers.name, inline: true },
-      { name: 'Возраст OOC', value: answers.age, inline: true },
-      { name: 'Время на проекте', value: answers.time, inline: false },
-      { name: 'Опыт в других семьях', value: answers.experience, inline: false },
+      { name: 'Нік у грі', value: answers.nick, inline: true },
+      { name: 'Як звати', value: answers.name, inline: true },
+      { name: 'Вік OOC', value: answers.age, inline: true },
+      { name: 'Час на проєкті', value: answers.time, inline: false },
+      { name: 'Досвід в інших сім’ях', value: answers.experience, inline: false },
     ],
   });
   return embed;
@@ -189,7 +189,7 @@ async function handleApplicationsInteraction(interaction) {
     await handleApplicationsInteractionInner(interaction);
   } catch (error) {
     console.error('[apply] error:', error);
-    const payload = errorReply(error?.message || 'ошибка заявки');
+    const payload = errorReply(error?.message || 'помилка заявки');
     try {
       if (interaction.deferred || interaction.replied) {
         await interaction.followUp(payload);
@@ -214,7 +214,7 @@ async function handleApplicationsInteractionInner(interaction) {
         embeds: [
           infoEmbed({
             title: 'заявка',
-            description: 'у тебя уже есть активная заявка · дождись решения',
+            description: 'у тебе вже є активна заявка · дочекайся рішення',
             color: BRAND.soft,
           }),
         ],
@@ -234,12 +234,12 @@ async function handleApplicationsInteractionInner(interaction) {
     };
 
     if (!answers.nick || !answers.name || !answers.age || !answers.time || !answers.experience) {
-      return interaction.reply(errorReply('заполни все поля'));
+      return interaction.reply(errorReply('заповни всі поля'));
     }
 
     const ageNum = Number(answers.age.replace(/[^\d]/g, ''));
     if (!Number.isFinite(ageNum) || ageNum < 10 || ageNum > 99) {
-      return interaction.reply(errorReply('возраст OOC: укажи число от 10 до 99'));
+      return interaction.reply(errorReply('вік OOC: вкажи число від 10 до 99'));
     }
 
     const store = loadStore();
@@ -250,7 +250,7 @@ async function handleApplicationsInteractionInner(interaction) {
         embeds: [
           infoEmbed({
             title: 'заявка',
-            description: 'у тебя уже есть активная заявка · дождись решения',
+            description: 'у тебе вже є активна заявка · дочекайся рішення',
             color: BRAND.soft,
           }),
         ],
@@ -261,7 +261,7 @@ async function handleApplicationsInteractionInner(interaction) {
     const reviewChannelId = getReviewChannelId(interaction.guildId, settings);
     if (!reviewChannelId) {
       return interaction.reply(
-        errorReply('канал рассмотрения не настроен · `/apply setup`'),
+        errorReply('канал розгляду не налаштовано · `/apply setup`'),
       );
     }
 
@@ -270,7 +270,7 @@ async function handleApplicationsInteractionInner(interaction) {
       (await interaction.guild.channels.fetch(reviewChannelId).catch(() => null));
 
     if (!channel?.isTextBased?.()) {
-      return interaction.reply(errorReply('канал рассмотрения недоступен'));
+      return interaction.reply(errorReply('канал розгляду недоступний'));
     }
 
     const me = interaction.guild.members.me;
@@ -279,14 +279,14 @@ async function handleApplicationsInteractionInner(interaction) {
       if (!perms?.has(PermissionFlagsBits.ViewChannel) || !perms?.has(PermissionFlagsBits.SendMessages)) {
         return interaction.reply(
           errorReply(
-            `боту закрыт канал рассмотрения ${channel} · выдай **Просмотр канала** и **Отправка сообщений**`,
+            `боту закритий канал розгляду ${channel} · видай **Перегляд каналу** і **Надсилання повідомлень**`,
           ),
         );
       }
     }
 
     const appId = String(Date.now());
-    const embed = applicationEmbed(interaction.user, answers, 'ожидает');
+    const embed = applicationEmbed(interaction.user, answers, 'очікує');
     let message;
     try {
       message = await channel.send({
@@ -296,12 +296,12 @@ async function handleApplicationsInteractionInner(interaction) {
     } catch (sendErr) {
       console.error('[apply] send fail:', sendErr);
       const code = sendErr?.code;
-      let hint = 'не удалось отправить заявку в канал рассмотрения';
+      let hint = 'не вдалося надіслати заявку в канал розгляду';
       if (code === 50001 || code === 50013) {
         hint =
-          'боту не хватает прав в канале рассмотрения · нужен **Просмотр канала** + **Отправка сообщений** + **Встраивание ссылок**';
+          'боту не вистачає прав у каналі розгляду · потрібні **Перегляд каналу** + **Надсилання повідомлень** + **Вбудовування посилань**';
       } else if (sendErr?.message) {
-        hint = `не удалось отправить заявку · ${String(sendErr.message).slice(0, 120)}`;
+        hint = `не вдалося надіслати заявку · ${String(sendErr.message).slice(0, 120)}`;
       }
       return interaction.reply(errorReply(hint));
     }
@@ -319,7 +319,7 @@ async function handleApplicationsInteractionInner(interaction) {
       embeds: [
         successEmbed({
           title: 'заявка',
-          description: 'заявка отправлена · жди решения руководства',
+          description: 'заявку надіслано · чекай рішення керівництва',
         }),
       ],
       ephemeral: true,
@@ -328,12 +328,12 @@ async function handleApplicationsInteractionInner(interaction) {
 
   if (interaction.isButton() && (id.startsWith('apply:accept:') || id.startsWith('apply:reject:'))) {
     if (!canReview(interaction)) {
-      return interaction.reply(errorReply('нужны права Manage Roles / Manage Guild'));
+      return interaction.reply(errorReply('потрібні права Manage Roles / Manage Guild'));
     }
 
     const parsed = parseReviewId(id);
     if (!parsed) {
-      return interaction.reply(errorReply('некорректная заявка'));
+      return interaction.reply(errorReply('некоректна заявка'));
     }
 
     const store = loadStore();
@@ -347,12 +347,12 @@ async function handleApplicationsInteractionInner(interaction) {
           embeds: [
             errorEmbed({
               title: 'заявка · неактуальна',
-              description: 'эта заявка уже обработана или устарела',
+              description: 'ця заявка вже оброблена або застаріла',
             }),
           ],
         });
       } catch {
-        await interaction.reply(errorReply('заявка уже обработана')).catch(() => null);
+        await interaction.reply(errorReply('заявка вже оброблена')).catch(() => null);
       }
       return;
     }
@@ -376,10 +376,10 @@ async function handleApplicationsInteractionInner(interaction) {
       delete settings.pending[parsed.userId];
       saveStore(store);
 
-      const embed = applicationEmbed(user || { id: parsed.userId, tag: parsed.userId }, answers, 'принята');
+      const embed = applicationEmbed(user || { id: parsed.userId, tag: parsed.userId }, answers, 'прийнята');
       embed.addFields({
-        name: 'решение',
-        value: `принял ${interaction.user}`,
+        name: 'рішення',
+        value: `прийняв ${interaction.user}`,
         inline: false,
       });
 
@@ -390,8 +390,8 @@ async function handleApplicationsInteractionInner(interaction) {
           .send({
             embeds: [
               successEmbed({
-                title: 'заявка принята',
-                description: `тебя приняли на сервере **${interaction.guild.name}**`,
+                title: 'заявку прийнято',
+                description: `тебе прийняли на сервері **${interaction.guild.name}**`,
               }),
             ],
           })
@@ -403,10 +403,10 @@ async function handleApplicationsInteractionInner(interaction) {
     delete settings.pending[parsed.userId];
     saveStore(store);
 
-    const embed = applicationEmbed(user || { id: parsed.userId, tag: parsed.userId }, answers, 'отклонена');
+    const embed = applicationEmbed(user || { id: parsed.userId, tag: parsed.userId }, answers, 'відхилена');
     embed.addFields({
-      name: 'решение',
-      value: `отклонил ${interaction.user}`,
+      name: 'рішення',
+      value: `відхилив ${interaction.user}`,
       inline: false,
     });
 
@@ -417,8 +417,8 @@ async function handleApplicationsInteractionInner(interaction) {
         .send({
           embeds: [
             errorEmbed({
-              title: 'заявка отклонена',
-              description: `заявку на **${interaction.guild.name}** отклонили`,
+              title: 'заявку відхилено',
+              description: `заявку на **${interaction.guild.name}** відхилили`,
             }),
           ],
         })

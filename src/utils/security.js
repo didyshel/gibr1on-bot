@@ -1,6 +1,6 @@
 const { PermissionFlagsBits, PermissionsBitField } = require('discord.js');
 
-/** Права, которые нельзя выдавать через self-role */
+/** Права, які не можна видавати через self-role */
 const DANGEROUS_ROLE_PERMS =
   PermissionFlagsBits.Administrator |
   PermissionFlagsBits.ManageGuild |
@@ -22,7 +22,7 @@ const DANGEROUS_ROLE_PERMS =
 
 const rateBuckets = new Map();
 
-/** Команды, доступные всем (активность / утилиты). Ролевой гейт на них не действует. */
+/** Команди, доступні всім (активність / утиліти). Рольовий гейт на них не діє. */
 const PUBLIC_COMMANDS = new Set([
   'ping',
   'help',
@@ -35,8 +35,8 @@ const PUBLIC_COMMANDS = new Set([
 ]);
 
 /**
- * Топовые команды — только OWNER_IDS (gibr1on).
- * Остальные модеры/админы Discord их не выполнят.
+ * Топові команди — лише OWNER_IDS (gibr1on).
+ * Решта модерів/адмінів Discord їх не виконає.
  */
 const OWNER_ONLY_COMMANDS = new Set([
   'ban',
@@ -75,7 +75,7 @@ function ownerIds() {
   return envList('OWNER_IDS');
 }
 
-/** Роли, которым разрешено пользоваться ботом. Пусто = без ограничения по ролям */
+/** Ролі, яким дозволено користуватися ботом. Порожньо = без обмеження за ролями */
 function allowedRoleIds() {
   return envList('ALLOWED_ROLE_IDS');
 }
@@ -111,7 +111,7 @@ function memberHasAllowedRole(member) {
     return roles.some((id) => member.roles.includes(id));
   }
 
-  // иногда _roles
+  // іноді _roles
   if (Array.isArray(member._roles)) {
     return roles.some((id) => member._roles.includes(id));
   }
@@ -140,7 +140,7 @@ function checkRateLimit(userId, { limit = 8, windowMs = 10_000 } = {}) {
   hits.push(now);
   rateBuckets.set(key, hits);
   if (hits.length > limit) {
-    return { ok: false, reason: 'слишком быстро · подожди пару секунд' };
+    return { ok: false, reason: 'занадто швидко · зачекай пару секунд' };
   }
   return { ok: true };
 }
@@ -157,16 +157,16 @@ function requiredPermissions(command) {
 }
 
 /**
- * Единая проверка доступа к команде / кнопке.
+ * Єдина перевірка доступу до команди / кнопки.
  * @returns {{ ok: true } | { ok: false, reason: string }}
  */
 function assertInteractionAccess(interaction, command = null) {
   if (!interaction.guildId) {
-    return { ok: false, reason: 'только на сервере' };
+    return { ok: false, reason: 'лише на сервері' };
   }
 
   if (!isAllowedGuild(interaction.guildId)) {
-    return { ok: false, reason: 'сервер не разрешён' };
+    return { ok: false, reason: 'сервер не дозволений' };
   }
 
   const rate = checkRateLimit(interaction.user.id);
@@ -187,10 +187,10 @@ function assertInteractionAccess(interaction, command = null) {
     customId.startsWith('apply:accept:') ||
     customId.startsWith('apply:reject:');
 
-  // Топовые slash-команды — строго OWNER_IDS
+  // Топові slash-команди — суворо OWNER_IDS
   if (isOwnerCmd) {
     if (!isOwner(interaction.user.id)) {
-      return { ok: false, reason: 'только для gibr1on (OWNER_IDS)' };
+      return { ok: false, reason: 'лише для gibr1on (OWNER_IDS)' };
     }
     return { ok: true };
   }
@@ -201,16 +201,16 @@ function assertInteractionAccess(interaction, command = null) {
     return { ok: true };
   }
 
-  // Остальное (напр. /vc): роль-гейт + Discord permissions
+  // Решта (напр. /vc): рольовий гейт + Discord permissions
   const roleGate = allowedRoleIds();
   if (roleGate.length && !memberHasAllowedRole(interaction.member)) {
-    return { ok: false, reason: 'нужна разрешённая роль' };
+    return { ok: false, reason: 'потрібна дозволена роль' };
   }
 
   if (command) {
     const need = requiredPermissions(command);
     if (need && !interaction.memberPermissions?.has(need)) {
-      return { ok: false, reason: 'недостаточно прав' };
+      return { ok: false, reason: 'недостатньо прав' };
     }
   }
 

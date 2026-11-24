@@ -21,16 +21,16 @@ function registerWelcome(client) {
         description: [
           `${member}`,
           '',
-          'ты переступил порог семьи **Nemiroff**.',
-          'здесь ждут актив, контент и своих.',
+          'ти переступив поріг родини **Nemiroff**.',
+          'тут на тебе чекають актив, контент і свої.',
           '',
-          'ознакомься с правилами · подай заявку · стань частью семьи.',
+          'ознайомся з правилами · подай заявку · стань частиною родини.',
         ].join('\n'),
         thumbnail: member.user.displayAvatarURL({ size: 512 }),
         color: BRAND.color,
         fields: [
-          { name: 'участников', value: `\`${member.guild.memberCount}\``, inline: true },
-          { name: 'аккаунт', value: `<t:${created}:R>`, inline: true },
+          { name: 'учасників', value: `\`${member.guild.memberCount}\``, inline: true },
+          { name: 'акаунт', value: `<t:${created}:R>`, inline: true },
         ],
         footer: `Nemiroff · ${member.id}`,
       });
@@ -59,7 +59,7 @@ function registerWelcome(client) {
 
       await channel.send(payload);
     } catch (error) {
-      console.error('Ошибка приветствия:', error);
+      console.error('Помилка привітання:', error);
     }
   });
 }

@@ -10,31 +10,31 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('apply')
-    .setDescription('Заявки на вступление')
+    .setDescription('Заявки на вступ')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false)
     .addSubcommand((sub) =>
       sub
         .setName('setup')
-        .setDescription('Отправить кнопку заявки в канал')
+        .setDescription('Надіслати кнопку заявки в канал')
         .addChannelOption((opt) =>
           opt
             .setName('review_channel')
-            .setDescription('Куда приходят заявки на рассмотрение')
+            .setDescription('Куди надходять заявки на розгляд')
             .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
             .setRequired(true),
         )
         .addChannelOption((opt) =>
           opt
             .setName('panel_channel')
-            .setDescription('Куда поставить кнопку (по умолчанию — этот канал)')
+            .setDescription('Куди поставити кнопку (за замовчуванням — цей канал)')
             .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
             .setRequired(false),
         )
         .addRoleOption((opt) =>
           opt
             .setName('role')
-            .setDescription('Роль при принятии заявки')
+            .setDescription('Роль при прийнятті заявки')
             .setRequired(false),
         ),
     ),
@@ -48,10 +48,10 @@ module.exports = {
     const role = interaction.options.getRole('role');
 
     if (!reviewChannel?.isTextBased?.()) {
-      return interaction.reply(errorReply('нужен текстовый канал для рассмотрения'));
+      return interaction.reply(errorReply('потрібен текстовий канал для розгляду'));
     }
     if (!panelChannel?.isTextBased?.()) {
-      return interaction.reply(errorReply('нужен текстовый канал для кнопки'));
+      return interaction.reply(errorReply('потрібен текстовий канал для кнопки'));
     }
 
     const store = loadStore();
@@ -69,8 +69,8 @@ module.exports = {
           title: 'apply',
           description: [
             `кнопка · ${panelChannel}`,
-            `рассмотрение · ${reviewChannel}`,
-            role ? `роль при принятии · ${role}` : 'роль при принятии · не задана',
+            `розгляд · ${reviewChannel}`,
+            role ? `роль при прийнятті · ${role}` : 'роль при прийнятті · не задано',
           ].join('\n'),
         }),
       ],

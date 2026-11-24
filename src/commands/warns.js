@@ -7,27 +7,27 @@ const { warnEmbed, successEmbed, infoEmbed, errorReply, BRAND } = require('../ut
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('warns')
-    .setDescription('Посмотреть, удалить или очистить предупреждения')
+    .setDescription('Переглянути, видалити або очистити попередження')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addSubcommand((sub) =>
       sub
         .setName('list')
-        .setDescription('Список варнов участника')
+        .setDescription('Список варнів учасника')
         .addUserOption((opt) =>
-          opt.setName('user').setDescription('Участник').setRequired(true),
+          opt.setName('user').setDescription('Учасник').setRequired(true),
         ),
     )
     .addSubcommand((sub) =>
       sub
         .setName('remove')
-        .setDescription('Удалить один варн по номеру из списка')
+        .setDescription('Видалити один варн за номером зі списку')
         .addUserOption((opt) =>
-          opt.setName('user').setDescription('Участник').setRequired(true),
+          opt.setName('user').setDescription('Учасник').setRequired(true),
         )
         .addIntegerOption((opt) =>
           opt
             .setName('index')
-            .setDescription('Номер из /warns list (1, 2, …)')
+            .setDescription('Номер із /warns list (1, 2, …)')
             .setRequired(true)
             .setMinValue(1),
         ),
@@ -35,9 +35,9 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('clear')
-        .setDescription('Очистить все варны участника')
+        .setDescription('Очистити всі варни учасника')
         .addUserOption((opt) =>
-          opt.setName('user').setDescription('Участник').setRequired(true),
+          opt.setName('user').setDescription('Учасник').setRequired(true),
         ),
     ),
 
@@ -52,7 +52,7 @@ module.exports = {
           embeds: [
             infoEmbed({
               title: 'warns',
-              description: `у ${user} нет предупреждений`,
+              description: `у ${user} немає попереджень`,
               thumbnail: user.displayAvatarURL({ size: 256 }),
             }),
           ],
@@ -70,11 +70,11 @@ module.exports = {
           })
           .join('\n\n'),
         fields: [
-          { name: 'участник', value: `${user}`, inline: true },
-          { name: 'всего', value: `\`${warns.length}\``, inline: true },
+          { name: 'учасник', value: `${user}`, inline: true },
+          { name: 'всього', value: `\`${warns.length}\``, inline: true },
           {
-            name: 'удалить один',
-            value: '`/warns remove` · номер из списка',
+            name: 'видалити один',
+            value: '`/warns remove` · номер зі списку',
           },
         ],
       });
@@ -105,10 +105,10 @@ module.exports = {
           successEmbed({
             title: 'warns · remove',
             thumbnail: user.displayAvatarURL({ size: 256 }),
-            description: `убран варн **#${index}** у ${user}${casePart}`,
+            description: `прибрано варн **#${index}** у ${user}${casePart}`,
             fields: [
               { name: 'причина варна', value: removed.reason || '—' },
-              { name: 'осталось', value: `\`${result.remaining}\``, inline: true },
+              { name: 'залишилось', value: `\`${result.remaining}\``, inline: true },
             ],
           }),
         ],
@@ -116,7 +116,7 @@ module.exports = {
 
       await sendModLog(interaction.guild, {
         title: 'warns · remove',
-        description: `${user} · модератор ${interaction.user}\nубран #${index}: ${removed.reason || '—'}`,
+        description: `${user} · модератор ${interaction.user}\nприбрано #${index}: ${removed.reason || '—'}`,
         color: BRAND.success,
         footer: `id · ${user.id}`,
       });
@@ -129,7 +129,7 @@ module.exports = {
         successEmbed({
           title: 'warns · clear',
           thumbnail: user.displayAvatarURL({ size: 256 }),
-          description: `варны ${user} очищены`,
+          description: `варни ${user} очищено`,
         }),
       ],
     });

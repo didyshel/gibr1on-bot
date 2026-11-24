@@ -41,11 +41,11 @@ function controlRow(channelId) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`tv:rename:${channelId}`)
-      .setLabel('имя')
+      .setLabel('ім’я')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`tv:limit:${channelId}`)
-      .setLabel('лимит')
+      .setLabel('ліміт')
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId(`tv:lock:${channelId}`)
@@ -64,8 +64,8 @@ async function sendOwnerPanel(channel, owner) {
     description: [
       `${channel}`,
       '',
-      'управление комнатой · только владелец',
-      '`имя` · `лимит` · `lock` · `kick`',
+      'керування кімнатою · лише власник',
+      '`ім’я` · `ліміт` · `lock` · `kick`',
     ].join('\n'),
     color: BRAND.soft,
   });
@@ -96,16 +96,16 @@ async function assertTempOwner(interaction, channelId) {
   const store = loadStore();
   const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
   if (!channel?.isVoiceBased?.()) {
-    return { ok: false, reason: 'комната не найдена' };
+    return { ok: false, reason: 'кімнату не знайдено' };
   }
   if (!store.channels[channelId] && !isTempName(channel.name)) {
-    return { ok: false, reason: 'это не temp voice' };
+    return { ok: false, reason: 'це не temp voice' };
   }
   const meta = store.channels[channelId];
   const ownerId = meta?.ownerId;
   const isMod = interaction.memberPermissions?.has(PermissionFlagsBits.ManageChannels);
   if (ownerId && ownerId !== interaction.user.id && !isMod) {
-    return { ok: false, reason: 'только владелец комнаты' };
+    return { ok: false, reason: 'лише власник кімнати' };
   }
   return { ok: true, channel, store, meta };
 }
@@ -119,12 +119,12 @@ async function handleTempVoiceInteraction(interaction) {
     if (action === 'rename') {
       const modal = new ModalBuilder()
         .setCustomId(`tvmodal:rename:${channelId}`)
-        .setTitle('имя комнаты');
+        .setTitle('ім’я кімнати');
       modal.addComponents(
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId('name')
-            .setLabel('новое имя')
+            .setLabel('нове ім’я')
             .setStyle(TextInputStyle.Short)
             .setMinLength(1)
             .setMaxLength(90)
@@ -137,12 +137,12 @@ async function handleTempVoiceInteraction(interaction) {
     if (action === 'limit') {
       const modal = new ModalBuilder()
         .setCustomId(`tvmodal:limit:${channelId}`)
-        .setTitle('лимит участников');
+        .setTitle('ліміт учасників');
       modal.addComponents(
         new ActionRowBuilder().addComponents(
           new TextInputBuilder()
             .setCustomId('limit')
-            .setLabel('0 = без лимита · макс 99')
+            .setLabel('0 = без ліміту · макс 99')
             .setStyle(TextInputStyle.Short)
             .setRequired(true),
         ),
@@ -183,12 +183,12 @@ async function handleTempVoiceInteraction(interaction) {
       const row = new ActionRowBuilder().addComponents(
         new UserSelectMenuBuilder()
           .setCustomId(`tvselect:kick:${channelId}`)
-          .setPlaceholder('кого выгнать')
+          .setPlaceholder('кого вигнати')
           .setMinValues(1)
           .setMaxValues(1),
       );
       return interaction.reply({
-        embeds: [infoEmbed({ title: 'temp voice · kick', description: 'выбери участника' })],
+        embeds: [infoEmbed({ title: 'temp voice · kick', description: 'обери учасника' })],
         components: [row],
         ephemeral: true,
       });
@@ -204,7 +204,7 @@ async function handleTempVoiceInteraction(interaction) {
       const name = interaction.fields.getTextInputValue('name').trim();
       await check.channel.setName(`⏳ ${name}`.slice(0, 100));
       return interaction.reply({
-        embeds: [successEmbed({ title: 'temp voice', description: `имя · **${check.channel.name}**` })],
+        embeds: [successEmbed({ title: 'temp voice', description: `ім’я · **${check.channel.name}**` })],
         ephemeral: true,
       });
     }
@@ -213,14 +213,14 @@ async function handleTempVoiceInteraction(interaction) {
       const raw = interaction.fields.getTextInputValue('limit').trim();
       const n = Number(raw);
       if (!Number.isInteger(n) || n < 0 || n > 99) {
-        return interaction.reply(errorReply('лимит: целое 0–99'));
+        return interaction.reply(errorReply('ліміт: ціле число 0–99'));
       }
       await check.channel.setUserLimit(n);
       return interaction.reply({
         embeds: [
           successEmbed({
             title: 'temp voice',
-            description: n ? `лимит · **${n}**` : 'лимит снят',
+            description: n ? `ліміт · **${n}**` : 'ліміт знято',
           }),
         ],
         ephemeral: true,
@@ -235,15 +235,15 @@ async function handleTempVoiceInteraction(interaction) {
 
     const targetId = interaction.values[0];
     if (targetId === interaction.user.id) {
-      return interaction.reply(errorReply('нельзя кикнуть себя'));
+      return interaction.reply(errorReply('не можна кікнути себе'));
     }
     const target = check.channel.members.get(targetId);
     if (!target) {
-      return interaction.reply(errorReply('участник не в этой комнате'));
+      return interaction.reply(errorReply('учасника немає в цій кімнаті'));
     }
     await target.voice.disconnect('Temp voice kick').catch(() => null);
     return interaction.reply({
-      embeds: [successEmbed({ title: 'temp voice', description: `${target} выгнан` })],
+      embeds: [successEmbed({ title: 'temp voice', description: `${target} вигнано` })],
       ephemeral: true,
     });
   }
@@ -298,13 +298,13 @@ function registerTempVoice(client) {
 
       if (newState.channelId === hubId && oldState.channelId !== hubId) {
         if (!me?.permissions?.has(PermissionFlagsBits.ManageChannels)) {
-          console.error('tempVoice: нет права Manage Channels');
+          console.error('tempVoice: немає права Manage Channels');
           await sendServerLog(guild, {
             category: 'server',
-            title: 'Temp voice: нет прав',
+            title: 'Temp voice: немає прав',
             color: BRAND.danger,
             description:
-              'Роли бота нужно: **Управлять каналами**, **Управлять ролями**, **Перемещать участников**.',
+              'Ролі бота потрібні: **Керувати каналами**, **Керувати ролями**, **Переміщувати учасників**.',
           });
           return;
         }
@@ -316,22 +316,22 @@ function registerTempVoice(client) {
         if (parentId) {
           const parent = await guild.channels.fetch(parentId).catch(() => null);
           if (!parent || parent.type !== ChannelType.GuildCategory) {
-            console.error('tempVoice: parent не категория:', parentId);
+            console.error('tempVoice: parent не категорія:', parentId);
             await sendServerLog(guild, {
               category: 'server',
-              title: 'Temp voice: неверная категория',
+              title: 'Temp voice: невірна категорія',
               color: BRAND.danger,
               description:
-                '`TEMP_VOICE_CATEGORY_ID` должен быть ID **категории**, либо поставь hub внутрь нужной категории.',
+                '`TEMP_VOICE_CATEGORY_ID` має бути ID **категорії**, або постав hub усередину потрібної категорії.',
             });
             return;
           }
           if (!parent.permissionsFor(me)?.has(PermissionFlagsBits.ManageChannels)) {
             await sendServerLog(guild, {
               category: 'server',
-              title: 'Temp voice: блок в категории',
+              title: 'Temp voice: блок у категорії',
               color: BRAND.danger,
-              description: `В категории **${parent.name}** боту запрещено управлять каналами.`,
+              description: `У категорії **${parent.name}** боту заборонено керувати каналами.`,
             });
             return;
           }
@@ -386,9 +386,9 @@ function registerTempVoice(client) {
           console.error('tempVoice move failed:', err.message);
           await sendServerLog(guild, {
             category: 'server',
-            title: 'Temp voice: не переместил',
+            title: 'Temp voice: не перемістив',
             color: BRAND.warn,
-            description: `Комната ${channel} создана. Нужно право **Перемещать участников**.`,
+            description: `Кімнату ${channel} створено. Потрібне право **Переміщувати учасників**.`,
           });
           setTimeout(async () => {
             const fresh = await guild.channels.fetch(channel.id).catch(() => null);

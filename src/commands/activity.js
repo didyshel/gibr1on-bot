@@ -5,9 +5,9 @@ const { brandEmbed, BRAND } = require('../utils/style');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('activity')
-    .setDescription('Когда пользователь последний раз писал')
+    .setDescription('Коли користувач востаннє писав')
     .addUserOption((opt) =>
-      opt.setName('user').setDescription('Пользователь').setRequired(false),
+      opt.setName('user').setDescription('Користувач').setRequired(false),
     ),
 
   async execute(interaction) {
@@ -19,12 +19,12 @@ module.exports = {
       color: BRAND.soft,
       thumbnail: user.displayAvatarURL({ size: 256 }),
       fields: [
-        { name: 'участник', value: `${user}`, inline: true },
+        { name: 'учасник', value: `${user}`, inline: true },
         {
-          name: 'последнее сообщение',
+          name: 'останнє повідомлення',
           value: ts
             ? `<t:${Math.floor(ts / 1000)}:R>`
-            : 'нет данных',
+            : 'немає даних',
         },
       ],
     });

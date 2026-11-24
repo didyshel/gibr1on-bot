@@ -9,23 +9,23 @@ const { brandEmbed, infoEmbed, errorReply, successEmbed, BRAND } = require('../u
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('bday')
-    .setDescription('Дни рождения')
+    .setDescription('Дні народження')
     .addSubcommand((sub) =>
       sub
         .setName('set')
-        .setDescription('Установить свой ДР')
+        .setDescription('Встановити свій ДН')
         .addStringOption((opt) =>
           opt
             .setName('date')
-            .setDescription('Формат ДД.ММ — например 18.09')
+            .setDescription('Формат ДД.ММ — наприклад 18.09')
             .setRequired(true),
         ),
     )
     .addSubcommand((sub) =>
-      sub.setName('me').setDescription('Показать свой ДР'),
+      sub.setName('me').setDescription('Показати свій ДН'),
     )
     .addSubcommand((sub) =>
-      sub.setName('list').setDescription('Список дней рождения на сервере'),
+      sub.setName('list').setDescription('Список днів народження на сервері'),
     ),
 
   async execute(interaction) {
@@ -35,12 +35,12 @@ module.exports = {
       const raw = interaction.options.getString('date', true).trim();
       const match = raw.match(/^(\d{1,2})[./-](\d{1,2})$/);
       if (!match) {
-        return interaction.reply(errorReply('формат: `ДД.ММ` · например `18.09`'));
+        return interaction.reply(errorReply('формат: `ДД.ММ` · наприклад `18.09`'));
       }
       const day = Number(match[1]);
       const month = Number(match[2]);
       if (day < 1 || day > 31 || month < 1 || month > 12) {
-        return interaction.reply(errorReply('некорректная дата'));
+        return interaction.reply(errorReply('некоректна дата'));
       }
 
       setBirthday(interaction.guildId, interaction.user.id, day, month);
@@ -48,7 +48,7 @@ module.exports = {
         embeds: [
           successEmbed({
             title: 'bday',
-            description: `сохранено · **${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}**`,
+            description: `збережено · **${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}**`,
           }),
         ],
       });
@@ -58,7 +58,7 @@ module.exports = {
       const bday = getBirthday(interaction.guildId, interaction.user.id);
       if (!bday) {
         return interaction.reply(
-          errorReply('др не задан · `/bday set date:18.09`', { title: 'bday' }),
+          errorReply('дн не задано · `/bday set date:18.09`', { title: 'bday' }),
         );
       }
       return interaction.reply({
@@ -79,7 +79,7 @@ module.exports = {
         embeds: [
           infoEmbed({
             title: 'bday',
-            description: 'пока пусто',
+            description: 'поки порожньо',
           }),
         ],
         ephemeral: true,

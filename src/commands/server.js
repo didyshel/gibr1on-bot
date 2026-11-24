@@ -4,7 +4,7 @@ const { brandEmbed, BRAND } = require('../utils/style');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('server')
-    .setDescription('Карточка сервера'),
+    .setDescription('Картка сервера'),
 
   async execute(interaction) {
     const guild = interaction.guild;
@@ -26,18 +26,18 @@ module.exports = {
           thumbnail: guild.iconURL({ size: 256 }),
           image: guild.bannerURL({ size: 512 }) || undefined,
           fields: [
-            { name: 'участники', value: `\`${guild.memberCount}\``, inline: true },
-            { name: 'роли', value: `\`${guild.roles.cache.size}\``, inline: true },
-            { name: 'эмодзи', value: `\`${guild.emojis.cache.size}\``, inline: true },
+            { name: 'учасники', value: `\`${guild.memberCount}\``, inline: true },
+            { name: 'ролі', value: `\`${guild.roles.cache.size}\``, inline: true },
+            { name: 'емодзі', value: `\`${guild.emojis.cache.size}\``, inline: true },
             { name: 'текст', value: `\`${text}\``, inline: true },
             { name: 'голос', value: `\`${voice}\``, inline: true },
-            { name: 'бусты', value: `\`${boosts}\` · tier ${tier}`, inline: true },
+            { name: 'бусти', value: `\`${boosts}\` · tier ${tier}`, inline: true },
             {
-              name: 'владелец',
+              name: 'власник',
               value: owner ? `${owner.user}` : '—',
               inline: true,
             },
-            { name: 'создан', value: `<t:${created}:D>`, inline: true },
+            { name: 'створено', value: `<t:${created}:D>`, inline: true },
             { name: 'id', value: `\`${guild.id}\``, inline: true },
           ],
           footer: `Nemiroff App · ${guild.name}`,

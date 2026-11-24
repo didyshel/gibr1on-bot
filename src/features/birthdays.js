@@ -52,7 +52,7 @@ function registerBirthdays(client) {
 
         const embed = brandEmbed({
           title: 'happy birthday',
-          description: `<@${userId}>\n\nс днём рождения`,
+          description: `<@${userId}>\n\nз днем народження`,
           color: BRAND.glow,
         });
         await channel.send({ content: `<@${userId}>`, embeds: [embed] }).catch(() => null);

@@ -14,10 +14,10 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('warn')
-    .setDescription('Выдать предупреждение')
+    .setDescription('Видати попередження')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption((opt) =>
-      opt.setName('user').setDescription('Кому выдать warn').setRequired(true),
+      opt.setName('user').setDescription('Кому видати warn').setRequired(true),
     )
     .addStringOption((opt) =>
       opt.setName('reason').setDescription('Причина').setRequired(true),
@@ -59,19 +59,19 @@ module.exports = {
     });
 
     const fields = [
-      { name: 'участник', value: `${targetUser}`, inline: true },
+      { name: 'учасник', value: `${targetUser}`, inline: true },
       { name: 'case', value: `\`${caseLabel}\``, inline: true },
-      { name: 'всего', value: `\`${warns.length}\``, inline: true },
+      { name: 'всього', value: `\`${warns.length}\``, inline: true },
       { name: 'причина', value: reason },
     ];
 
     if (actions.length) {
-      fields.push({ name: 'эскалация', value: actions.map((a) => `\`${a}\``).join(' · ') });
+      fields.push({ name: 'ескалація', value: actions.map((a) => `\`${a}\``).join(' · ') });
     } else {
       const tips = [];
       const tAt = warnTimeoutAt();
       const kAt = warnKickAt();
-      if (tAt > 0) tips.push(`timeout @${tAt} (${warnTimeoutMinutes()}м)`);
+      if (tAt > 0) tips.push(`timeout @${tAt} (${warnTimeoutMinutes()}хв)`);
       if (kAt > 0) tips.push(`kick @${kAt}`);
       if (tips.length) {
         fields.push({ name: 'пороги', value: tips.join(' · ') });
@@ -96,14 +96,14 @@ module.exports = {
       .send({
         embeds: [
           warnEmbed({
-            title: 'предупреждение',
+            title: 'попередження',
             description: `сервер **${interaction.guild.name}**`,
             fields: [
               { name: 'причина', value: reason },
               { name: 'case', value: `\`${caseLabel}\``, inline: true },
-              { name: 'всего', value: `\`${warns.length}\``, inline: true },
+              { name: 'всього', value: `\`${warns.length}\``, inline: true },
               ...(actions.length
-                ? [{ name: 'эскалация', value: actions.join(' · ') }]
+                ? [{ name: 'ескалація', value: actions.join(' · ') }]
                 : []),
             ],
           }),
@@ -115,13 +115,13 @@ module.exports = {
       title: `warn · ${caseLabel}`,
       color: BRAND.warn,
       fields: [
-        { name: 'участник', value: `${targetUser}` },
+        { name: 'учасник', value: `${targetUser}` },
         { name: 'модератор', value: `${interaction.user}` },
         { name: 'причина', value: reason },
-        { name: 'всего', value: String(warns.length), inline: true },
+        { name: 'всього', value: String(warns.length), inline: true },
         { name: 'case', value: caseLabel, inline: true },
         ...(actions.length
-          ? [{ name: 'эскалация', value: actions.join(' · ') }]
+          ? [{ name: 'ескалація', value: actions.join(' · ') }]
           : []),
       ],
       footer: `id · ${targetUser.id}`,

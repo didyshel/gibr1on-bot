@@ -16,14 +16,14 @@ function resolveTempChannel(interaction) {
   const opted = interaction.options.getChannel('channel');
   const voice = interaction.member?.voice?.channel;
   const channel = opted || voice;
-  if (!channel?.isVoiceBased?.()) return { error: 'зайди в temp voice или укажи канал' };
+  if (!channel?.isVoiceBased?.()) return { error: 'зайди в temp voice або вкажи канал' };
   if (!store.channels[channel.id] && !String(channel.name || '').startsWith('⏳')) {
-    return { error: 'это не temp voice' };
+    return { error: 'це не temp voice' };
   }
   const meta = store.channels[channel.id];
   const isMod = interaction.memberPermissions?.has(PermissionFlagsBits.ManageChannels);
   if (meta?.ownerId && meta.ownerId !== interaction.user.id && !isMod) {
-    return { error: 'только владелец комнаты' };
+    return { error: 'лише власник кімнати' };
   }
   return { channel, store, meta };
 }
@@ -31,15 +31,15 @@ function resolveTempChannel(interaction) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('vc')
-    .setDescription('Управление своей temp voice комнатой')
+    .setDescription('Керування своєю temp voice кімнатою')
     .addSubcommand((sub) =>
       sub
         .setName('panel')
-        .setDescription('Панель кнопок управления')
+        .setDescription('Панель кнопок керування')
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Комната')
+            .setDescription('Кімната')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -47,14 +47,14 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('rename')
-        .setDescription('Переименовать комнату')
+        .setDescription('Перейменувати кімнату')
         .addStringOption((opt) =>
-          opt.setName('name').setDescription('Новое имя').setRequired(true).setMaxLength(90),
+          opt.setName('name').setDescription('Нова назва').setRequired(true).setMaxLength(90),
         )
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Комната')
+            .setDescription('Кімната')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -62,14 +62,14 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('limit')
-        .setDescription('Лимит участников (0 = без лимита)')
+        .setDescription('Ліміт учасників (0 = без ліміту)')
         .addIntegerOption((opt) =>
           opt.setName('count').setDescription('0–99').setRequired(true).setMinValue(0).setMaxValue(99),
         )
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Комната')
+            .setDescription('Кімната')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -77,14 +77,14 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('lock')
-        .setDescription('Закрыть/открыть комнату')
+        .setDescription('Закрити/відкрити кімнату')
         .addBooleanOption((opt) =>
           opt.setName('state').setDescription('true = lock').setRequired(false),
         )
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Комната')
+            .setDescription('Кімната')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -92,14 +92,14 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('kick')
-        .setDescription('Выгнать из комнаты')
+        .setDescription('Вигнати з кімнати')
         .addUserOption((opt) =>
           opt.setName('user').setDescription('Кого').setRequired(true),
         )
         .addChannelOption((opt) =>
           opt
             .setName('channel')
-            .setDescription('Комната')
+            .setDescription('Кімната')
             .addChannelTypes(ChannelType.GuildVoice)
             .setRequired(false),
         ),
@@ -130,7 +130,7 @@ module.exports = {
       const name = interaction.options.getString('name', true).trim();
       await channel.setName(`⏳ ${name}`.slice(0, 100));
       return interaction.reply({
-        embeds: [successEmbed({ title: 'vc', description: `имя · **${channel.name}**` })],
+        embeds: [successEmbed({ title: 'vc', description: `назва · **${channel.name}**` })],
         ephemeral: true,
       });
     }
@@ -142,7 +142,7 @@ module.exports = {
         embeds: [
           successEmbed({
             title: 'vc',
-            description: count ? `лимит · **${count}**` : 'лимит снят',
+            description: count ? `ліміт · **${count}**` : 'ліміт знято',
           }),
         ],
         ephemeral: true,
@@ -174,13 +174,13 @@ module.exports = {
     if (sub === 'kick') {
       const user = interaction.options.getUser('user', true);
       if (user.id === interaction.user.id) {
-        return interaction.reply(errorReply('нельзя кикнуть себя'));
+        return interaction.reply(errorReply('не можна кікнути себе'));
       }
       const target = channel.members.get(user.id);
-      if (!target) return interaction.reply(errorReply('участник не в этой комнате'));
+      if (!target) return interaction.reply(errorReply('учасника немає в цій кімнаті'));
       await target.voice.disconnect('Temp voice kick').catch(() => null);
       return interaction.reply({
-        embeds: [successEmbed({ title: 'vc', description: `${user} выгнан` })],
+        embeds: [successEmbed({ title: 'vc', description: `${user} вигнано` })],
         ephemeral: true,
       });
     }

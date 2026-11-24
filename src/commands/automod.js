@@ -15,19 +15,19 @@ const { successEmbed, infoEmbed, errorReply } = require('../utils/style');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('automod')
-    .setDescription('Управление автомодом')
+    .setDescription('Керування автомодом')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand((sub) =>
-      sub.setName('status').setDescription('Статус фильтров и ignore-списков'),
+      sub.setName('status').setDescription('Статус фільтрів та ignore-списків'),
     )
     .addSubcommand((sub) =>
       sub
         .setName('toggle')
-        .setDescription('Вкл/выкл фильтр')
+        .setDescription('Вкл/вимк фільтр')
         .addStringOption((opt) =>
           opt
             .setName('feature')
-            .setDescription('Что переключить')
+            .setDescription('Що перемкнути')
             .setRequired(true)
             .addChoices(
               { name: 'invites', value: 'invites' },
@@ -42,7 +42,7 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('ignore')
-        .setDescription('Исключить канал или роль из автомода')
+        .setDescription('Виключити канал або роль з автомода')
         .addChannelOption((opt) =>
           opt
             .setName('channel')
@@ -59,7 +59,7 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('unignore')
-        .setDescription('Убрать исключение канала или роли')
+        .setDescription('Прибрати виключення каналу або ролі')
         .addChannelOption((opt) =>
           opt
             .setName('channel')
@@ -76,7 +76,7 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('word')
-        .setDescription('Добавить стоп-слово')
+        .setDescription('Додати стоп-слово')
         .addStringOption((opt) =>
           opt.setName('add').setDescription('Слово').setRequired(true).setMaxLength(40),
         ),
@@ -84,13 +84,13 @@ module.exports = {
     .addSubcommand((sub) =>
       sub
         .setName('unword')
-        .setDescription('Убрать стоп-слово')
+        .setDescription('Прибрати стоп-слово')
         .addStringOption((opt) =>
           opt.setName('remove').setDescription('Слово').setRequired(true).setMaxLength(40),
         ),
     )
     .addSubcommand((sub) =>
-      sub.setName('words').setDescription('Список стоп-слов'),
+      sub.setName('words').setDescription('Список стоп-слів'),
     ),
 
   async execute(interaction) {
@@ -111,9 +111,9 @@ module.exports = {
           infoEmbed({
             title: 'automod · status',
             fields: [
-              { name: 'фильтры', value: flags },
-              { name: 'ignore каналы', value: ch },
-              { name: 'ignore роли', value: roles },
+              { name: 'фільтри', value: flags },
+              { name: 'ignore канали', value: ch },
+              { name: 'ignore ролі', value: roles },
             ],
           }),
         ],
@@ -139,7 +139,7 @@ module.exports = {
       const channel = interaction.options.getChannel('channel');
       const role = interaction.options.getRole('role');
       if (!channel && !role) {
-        return interaction.reply(errorReply('укажи channel или role'));
+        return interaction.reply(errorReply('вкажи channel або role'));
       }
 
       const parts = [];
@@ -173,7 +173,7 @@ module.exports = {
             title: 'automod · words',
             description: list.length
               ? list.map((w) => `\`${w}\``).join(', ')
-              : 'список пуст · `/automod word`',
+              : 'список порожній · `/automod word`',
           }),
         ],
         ephemeral: true,
@@ -182,13 +182,13 @@ module.exports = {
 
     if (sub === 'word') {
       const word = interaction.options.getString('add', true).trim();
-      if (word.length < 2) return interaction.reply(errorReply('слишком коротко'));
+      if (word.length < 2) return interaction.reply(errorReply('занадто коротко'));
       const list = addWord(gid, word);
       return interaction.reply({
         embeds: [
           successEmbed({
             title: 'automod',
-            description: `добавлено \`${word.toLowerCase()}\` · всего ${list.length}`,
+            description: `додано \`${word.toLowerCase()}\` · всього ${list.length}`,
           }),
         ],
         ephemeral: true,
@@ -202,7 +202,7 @@ module.exports = {
         embeds: [
           successEmbed({
             title: 'automod',
-            description: `убрано \`${word.toLowerCase()}\` · всего ${list.length}`,
+            description: `прибрано \`${word.toLowerCase()}\` · всього ${list.length}`,
           }),
         ],
         ephemeral: true,

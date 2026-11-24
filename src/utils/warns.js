@@ -19,11 +19,11 @@ function addWarn(guildId, userId, warn) {
 function removeWarn(guildId, userId, index1Based) {
   const data = readJson(FILE, {});
   const list = data[guildId]?.[userId];
-  if (!list?.length) return { ok: false, reason: 'нет варнов' };
+  if (!list?.length) return { ok: false, reason: 'немає варнів' };
 
   const idx = Number(index1Based) - 1;
   if (!Number.isInteger(idx) || idx < 0 || idx >= list.length) {
-    return { ok: false, reason: `номер от 1 до ${list.length}` };
+    return { ok: false, reason: `номер від 1 до ${list.length}` };
   }
 
   const [removed] = list.splice(idx, 1);

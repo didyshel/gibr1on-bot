@@ -9,12 +9,12 @@ const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
 
 if (!isSafeToken(token) || !clientId || !guildId) {
-  console.error('Заполни корректные DISCORD_TOKEN, CLIENT_ID и GUILD_ID в файле .env');
+  console.error('Заповни коректні DISCORD_TOKEN, CLIENT_ID та GUILD_ID у файлі .env');
   process.exit(1);
 }
 
 if (!/^\d{17,20}$/.test(String(guildId).trim())) {
-  console.error('GUILD_ID должен быть snowflake (числовой id сервера)');
+  console.error('GUILD_ID має бути snowflake (числовий id сервера)');
   process.exit(1);
 }
 
@@ -35,16 +35,16 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 (async () => {
   try {
-    console.log(`Регистрирую ${commands.length} slash-команд только на сервере ${guildId}…`);
+    console.log(`Реєструю ${commands.length} slash-команд лише на сервері ${guildId}…`);
 
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
       body: commands,
     });
 
-    // На всякий случай чистим глобальные команды — чтобы не светились в ЛС / чужих серверах
+    // На всяк випадок чистимо глобальні команди — щоб не світилися в ЛС / на чужих серверах
     await rest.put(Routes.applicationCommands(clientId), { body: [] });
 
-    console.log('Команды зарегистрированы (guild-only, DM выключены).');
+    console.log('Команди зареєстровано (guild-only, DM вимкнено).');
   } catch (error) {
     console.error(error);
     process.exit(1);

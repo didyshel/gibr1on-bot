@@ -71,15 +71,15 @@ async function buildUserInfoEmbed(guild, userId, client) {
     thumbnail: user.displayAvatarURL({ size: 4096 }),
     footer: `id · ${user.id}`,
     fields: [
-      { name: 'имя', value: user.username, inline: true },
+      { name: 'ім’я', value: user.username, inline: true },
       { name: 'display', value: user.globalName || '—', inline: true },
       { name: 'id', value: `\`${user.id}\``, inline: true },
-      { name: 'создан', value: `<t:${createdTs}:R>`, inline: true },
-      { name: 'бот', value: user.bot ? 'да' : 'нет', inline: true },
-      { name: 'бейджи', value: formatFlags(user) },
+      { name: 'створено', value: `<t:${createdTs}:R>`, inline: true },
+      { name: 'бот', value: user.bot ? 'так' : 'ні', inline: true },
+      { name: 'бейджі', value: formatFlags(user) },
       {
         name: 'аватар',
-        value: `[открыть](${user.displayAvatarURL({ size: 4096 })})`,
+        value: `[відкрити](${user.displayAvatarURL({ size: 4096 })})`,
         inline: true,
       },
     ],
@@ -88,7 +88,7 @@ async function buildUserInfoEmbed(guild, userId, client) {
   if (user.banner) {
     const banner = user.bannerURL({ size: 4096 });
     embed.setImage(banner);
-    embed.addFields({ name: 'баннер', value: `[открыть](${banner})`, inline: true });
+    embed.addFields({ name: 'банер', value: `[відкрити](${banner})`, inline: true });
   } else if (user.accentColor) {
     embed.addFields({
       name: 'accent',
@@ -107,10 +107,10 @@ async function buildUserInfoEmbed(guild, userId, client) {
       .map((r) => `${r}`);
 
     embed.addFields(
-      { name: 'на сервере', value: 'да', inline: true },
-      { name: 'ник', value: member.nickname || '—', inline: true },
+      { name: 'на сервері', value: 'так', inline: true },
+      { name: 'нік', value: member.nickname || '—', inline: true },
       {
-        name: 'зашёл',
+        name: 'зайшов',
         value: joinedTs ? `<t:${joinedTs}:R>` : '—',
         inline: true,
       },
@@ -118,42 +118,42 @@ async function buildUserInfoEmbed(guild, userId, client) {
         name: 'буст',
         value: member.premiumSince
           ? `<t:${Math.floor(member.premiumSinceTimestamp / 1000)}:R>`
-          : 'нет',
+          : 'ні',
         inline: true,
       },
       {
         name: 'timeout',
         value: member.communicationDisabledUntilTimestamp
           ? `до <t:${Math.floor(member.communicationDisabledUntilTimestamp / 1000)}:R>`
-          : 'нет',
+          : 'ні',
         inline: true,
       },
       {
         name: 'войс',
-        value: member.voice?.channel ? `${member.voice.channel}` : 'нет',
+        value: member.voice?.channel ? `${member.voice.channel}` : 'ні',
         inline: true,
       },
       {
-        name: `роли · ${roles.length}`,
+        name: `ролі · ${roles.length}`,
         value: roles.length ? roles.slice(0, 30).join(' ') : '—',
       },
       {
-        name: 'высшая',
+        name: 'найвища',
         value: member.roles.highest?.id !== guild.id
           ? `${member.roles.highest}`
           : '—',
         inline: true,
       },
       {
-        name: 'админ',
-        value: member.permissions.has('Administrator') ? 'да' : 'нет',
+        name: 'адмін',
+        value: member.permissions.has('Administrator') ? 'так' : 'ні',
         inline: true,
       },
     );
   } else {
     embed.addFields({
-      name: 'на этом сервере',
-      value: 'нет',
+      name: 'на цьому сервері',
+      value: 'ні',
     });
   }
 
@@ -173,7 +173,7 @@ function registerUserInfoChannel(client) {
           embeds: [
             infoEmbed({
               title: 'user info',
-              description: 'вставь **id** или упоминание',
+              description: 'встав **id** або згадку',
             }),
           ],
         });
@@ -189,7 +189,7 @@ function registerUserInfoChannel(client) {
             embeds: [
               errorEmbed({
                 title: 'user info',
-                description: `не найден · \`${id}\``,
+                description: `не знайдено · \`${id}\``,
               }),
             ],
           });
@@ -206,7 +206,7 @@ function registerUserInfoChannel(client) {
           embeds: [
             errorEmbed({
               title: 'user info',
-              description: 'не удалось получить данные',
+              description: 'не вдалося отримати дані',
             }),
           ],
         })

@@ -12,13 +12,13 @@ const { allowRoles } = require('../utils/selfroles');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('roles')
-    .setDescription('Панель ролей по кнопкам')
+    .setDescription('Панель ролей за кнопками')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false)
     .addSubcommand((sub) =>
       sub
         .setName('setup')
-        .setDescription('Отправить панель выбора ролей')
+        .setDescription('Надіслати панель вибору ролей')
         .addRoleOption((opt) =>
           opt.setName('role1').setDescription('Роль 1').setRequired(true),
         )
@@ -37,7 +37,7 @@ module.exports = {
         .addStringOption((opt) =>
           opt
             .setName('title')
-            .setDescription('Заголовок панели')
+            .setDescription('Заголовок панелі')
             .setRequired(false),
         ),
     ),
@@ -61,17 +61,17 @@ module.exports = {
     for (const role of unique) {
       if (role.managed) {
         return interaction.reply(
-          errorReply(`роль ${role} управляется интеграцией`),
+          errorReply(`роль ${role} керується інтеграцією`),
         );
       }
       if (isDangerousRole(role)) {
         return interaction.reply(
-          errorReply(`роль ${role} слишком мощная для self-role`),
+          errorReply(`роль ${role} надто потужна для self-role`),
         );
       }
       if (me && role.position >= me.roles.highest.position) {
         return interaction.reply(
-          errorReply(`роль ${role} выше или равна роли бота`),
+          errorReply(`роль ${role} вища або дорівнює ролі бота`),
         );
       }
     }
@@ -82,13 +82,13 @@ module.exports = {
     );
 
     const title =
-      interaction.options.getString('title') || 'роли';
+      interaction.options.getString('title') || 'ролі';
     const embed = brandEmbed({
       title,
       description: [
         unique.map((role) => `· ${role}`).join('\n'),
         '',
-        'нажми кнопку — получить или снять',
+        'натисни кнопку — отримати або зняти',
       ].join('\n'),
       color: BRAND.color,
     });
@@ -106,7 +106,7 @@ module.exports = {
       embeds: [
         successEmbed({
           title: 'roles',
-          description: 'панель отправлена',
+          description: 'панель надіслано',
         }),
       ],
       ephemeral: true,

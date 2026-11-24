@@ -16,9 +16,9 @@ function progressBar(pct) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('level')
-    .setDescription('Уровень, XP и активность')
+    .setDescription('Рівень, XP та активність')
     .addUserOption((opt) =>
-      opt.setName('user').setDescription('Участник').setRequired(false),
+      opt.setName('user').setDescription('Учасник').setRequired(false),
     ),
 
   async execute(interaction) {
@@ -35,8 +35,8 @@ module.exports = {
       const voiceMin = Number(row.voiceMinutes) || 0;
       const voiceLabel =
         voiceMin >= 60
-          ? `${Math.floor(voiceMin / 60)}ч ${voiceMin % 60}м`
-          : `${voiceMin} мин`;
+          ? `${Math.floor(voiceMin / 60)}г ${voiceMin % 60}хв`
+          : `${voiceMin} хв`;
 
       await interaction.editReply({
         embeds: [
@@ -45,22 +45,22 @@ module.exports = {
             color: BRAND.soft,
             thumbnail: user.displayAvatarURL({ size: 256 }),
             fields: [
-              { name: 'участник', value: `${user}`, inline: true },
-              { name: 'уровень', value: `\`${level}\``, inline: true },
+              { name: 'учасник', value: `${user}`, inline: true },
+              { name: 'рівень', value: `\`${level}\``, inline: true },
               { name: 'ранг', value: rank ? `\`${rank}\`` : '—', inline: true },
               {
-                name: 'активность',
+                name: 'активність',
                 value: activity ? `<@&${activity.roleId}>` : '—',
                 inline: true,
               },
-              { name: 'сообщения', value: `\`${row.messages || 0}\``, inline: true },
+              { name: 'повідомлення', value: `\`${row.messages || 0}\``, inline: true },
               { name: 'голос', value: `\`${voiceLabel}\``, inline: true },
               {
                 name: 'xp',
                 value: `\`${row.xp || 0}\` · ${progressBar(pct)} ${pct}%`,
               },
               {
-                name: 'до следующего',
+                name: 'до наступного',
                 value: `\`${intoLevel}/${need}\``,
                 inline: true,
               },
@@ -70,7 +70,7 @@ module.exports = {
       });
     } catch (error) {
       console.error('level cmd:', error);
-      const payload = errorReply(error?.message || 'не удалось показать уровень');
+      const payload = errorReply(error?.message || 'не вдалося показати рівень');
       if (interaction.deferred || interaction.replied) {
         await interaction.editReply(payload).catch(() => null);
       } else {

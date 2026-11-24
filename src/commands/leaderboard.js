@@ -5,7 +5,7 @@ const { brandEmbed, BRAND } = require('../utils/style');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('leaderboard')
-    .setDescription('Топ активности сервера'),
+    .setDescription('Топ активності сервера'),
 
   async execute(interaction) {
     const top = getLeaderboard(interaction.guildId, 10);
@@ -14,7 +14,7 @@ module.exports = {
         embeds: [
           brandEmbed({
             title: 'leaderboard',
-            description: 'пока пусто · пишите в чат и сидите в войсе вместе',
+            description: 'поки порожньо · пишіть у чат і сидіть у войсі разом',
             color: BRAND.soft,
           }),
         ],
@@ -25,8 +25,8 @@ module.exports = {
     const lines = top.map((row, i) => {
       const voice =
         row.voiceMinutes >= 60
-          ? `${Math.floor(row.voiceMinutes / 60)}ч`
-          : `${row.voiceMinutes}м`;
+          ? `${Math.floor(row.voiceMinutes / 60)}г`
+          : `${row.voiceMinutes}хв`;
       return (
         `**${i + 1}.** <@${row.userId}> · lvl \`${row.level}\` · \`${row.xp}\` xp\n` +
         `msgs \`${row.messages}\` · voice \`${voice}\``
@@ -36,7 +36,7 @@ module.exports = {
     await interaction.reply({
       embeds: [
         brandEmbed({
-          title: 'leaderboard · активность',
+          title: 'leaderboard · активність',
           description: lines.join('\n'),
           color: BRAND.color,
         }),
