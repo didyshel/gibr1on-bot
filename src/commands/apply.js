@@ -59,9 +59,23 @@ module.exports = {
     settings.reviewChannelId = reviewChannel.id;
     settings.acceptRoleId = role?.id || null;
     settings.panelChannelId = panelChannel.id;
-    saveStore(store);
 
-    await panelChannel.send(panelPayload());
+    let panelMessage = null;
+    if (settings.panelMessageId) {
+      const old =
+        (await panelChannel.messages.fetch(settings.panelMessageId).catch(() => null)) ||
+        null;
+      if (old?.editable) {
+        panelMessage = await old.edit(panelPayload()).catch(() => null);
+      }
+    }
+
+    if (!panelMessage) {
+      panelMessage = await panelChannel.send(panelPayload());
+    }
+
+    settings.panelMessageId = panelMessage.id;
+    saveStore(store);
 
     await interaction.reply({
       embeds: [
@@ -71,6 +85,7 @@ module.exports = {
             `кнопка · ${panelChannel}`,
             `розгляд · ${reviewChannel}`,
             role ? `роль при прийнятті · ${role}` : 'роль при прийнятті · не задано',
+            'текст кнопки оновлено українською',
           ].join('\n'),
         }),
       ],

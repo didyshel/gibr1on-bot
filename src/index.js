@@ -165,7 +165,9 @@ let handleApplicationsInteraction = async (interaction) => {
   );
 };
 safeRegister('applications', () => {
-  handleApplicationsInteraction = require('./features/applications').handleApplicationsInteraction;
+  const apps = require('./features/applications');
+  handleApplicationsInteraction = apps.handleApplicationsInteraction;
+  apps.registerApplications(client);
 });
 
 safeRegister('reminders', () => require('./features/reminders').registerReminders(client));

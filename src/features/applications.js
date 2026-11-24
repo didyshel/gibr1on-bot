@@ -6,10 +6,11 @@ const {
   TextInputBuilder,
   TextInputStyle,
   PermissionFlagsBits,
+  Events,
 } = require('discord.js');
 const { readJson, writeJson } = require('../utils/store');
 const { applyReviewChannelId, applyAcceptRoleId } = require('../utils/config');
-const { isOwner, isDangerousRole } = require('../utils/security');
+const { isOwner, isDangerousRole, isAllowedGuild } = require('../utils/security');
 const {
   brandEmbed,
   infoEmbed,
@@ -20,6 +21,8 @@ const {
 } = require('../utils/style');
 
 const FILE = 'applications.json';
+/** Текст кнопки панелі — українською (не «Подать») */
+const PANEL_BUTTON_LABEL = 'Залишити заявку';
 
 function loadStore() {
   const raw = readJson(FILE, {});
@@ -60,7 +63,7 @@ function panelRow() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('apply:open')
-      .setLabel('Подати заявку')
+      .setLabel(PANEL_BUTTON_LABEL)
       .setStyle(ButtonStyle.Danger),
   );
 }
@@ -68,6 +71,120 @@ function panelRow() {
 /** Повідомлення панелі: червона кнопка заявки */
 function panelPayload() {
   return { components: [panelRow()] };
+}
+
+function messageHasApplyButton(message) {
+  return Boolean(
+    message?.components?.some((row) =>
+      row.components?.some((c) => c.customId === 'apply:open'),
+    ),
+  );
+}
+
+function applyButtonLabel(message) {
+  for (const row of message?.components || []) {
+    for (const c of row.components || []) {
+      if (c.customId === 'apply:open') return c.label || '';
+    }
+  }
+  return '';
+}
+
+/**
+ * Оновлює текст кнопки в уже надісланому повідомленні панелі.
+ * Discord не змінює label сам після рестарту — треба edit.
+ */
+async function refreshPanelMessage(message) {
+  if (!messageHasApplyButton(message)) return false;
+  if (applyButtonLabel(message) === PANEL_BUTTON_LABEL) return false;
+  await message.edit(panelPayload());
+  return true;
+}
+
+async function scanChannelForApplyPanels(channel, botId) {
+  if (!channel?.isTextBased?.() || channel.isThread?.()) return { updated: 0, found: null };
+  const recent = await channel.messages.fetch({ limit: 40 }).catch(() => null);
+  if (!recent) return { updated: 0, found: null };
+
+  let updated = 0;
+  let found = null;
+  for (const msg of recent.values()) {
+    if (msg.author?.id !== botId) continue;
+    if (!messageHasApplyButton(msg)) continue;
+    found = msg;
+    if (await refreshPanelMessage(msg).catch(() => false)) updated += 1;
+  }
+  return { updated, found };
+}
+
+async function refreshGuildPanels(guild, settings) {
+  let updated = 0;
+  const botId = guild.client.user?.id;
+
+  if (settings.panelMessageId && settings.panelChannelId) {
+    const channel =
+      guild.channels.cache.get(settings.panelChannelId) ||
+      (await guild.channels.fetch(settings.panelChannelId).catch(() => null));
+    if (channel?.isTextBased?.()) {
+      const msg = await channel.messages.fetch(settings.panelMessageId).catch(() => null);
+      if (msg && (await refreshPanelMessage(msg).catch(() => false))) updated += 1;
+    }
+  }
+
+  const channelIds = new Set();
+  if (settings.panelChannelId) channelIds.add(settings.panelChannelId);
+
+  // якщо panelChannelId ще не збережений — шукаємо кнопку по текстових каналах
+  if (!channelIds.size) {
+    for (const ch of guild.channels.cache.values()) {
+      if (ch.isTextBased?.() && !ch.isThread?.()) channelIds.add(ch.id);
+    }
+  }
+
+  for (const channelId of channelIds) {
+    const channel =
+      guild.channels.cache.get(channelId) ||
+      (await guild.channels.fetch(channelId).catch(() => null));
+    const { updated: n, found } = await scanChannelForApplyPanels(channel, botId);
+    updated += n;
+    if (found && (!settings.panelMessageId || !settings.panelChannelId)) {
+      settings.panelChannelId = found.channelId;
+      settings.panelMessageId = found.id;
+    }
+  }
+
+  return updated;
+}
+
+async function refreshAllApplyPanels(client) {
+  const store = loadStore();
+  let total = 0;
+  const guildIds = new Set([
+    ...Object.keys(store),
+    ...client.guilds.cache.keys(),
+  ]);
+
+  for (const guildId of guildIds) {
+    if (!isAllowedGuild(guildId)) continue;
+    const guild = client.guilds.cache.get(guildId) || (await client.guilds.fetch(guildId).catch(() => null));
+    if (!guild) continue;
+    const settings = guildSettings(store, guildId);
+    const n = await refreshGuildPanels(guild, settings);
+    total += n;
+  }
+  saveStore(store);
+  if (total) console.log(`[apply] оновлено панелей: ${total}`);
+  else console.log('[apply] панелі перевірено · змін не потрібно або кнопка не знайдена');
+}
+
+function registerApplications(client) {
+  client.once(Events.ClientReady, () => {
+    setTimeout(() => {
+      refreshAllApplyPanels(client).catch((err) =>
+        console.warn('[apply] refresh panels:', err.message),
+      );
+    }, 4_000);
+  });
 }
 
 function buildApplyModal() {
@@ -206,6 +323,20 @@ async function handleApplicationsInteractionInner(interaction) {
   const id = interaction.customId || '';
 
   if (interaction.isButton() && id === 'apply:open') {
+    // стара панель лишає російський label у повідомленні — правимо на місці
+    if (interaction.message?.editable) {
+      refreshPanelMessage(interaction.message)
+        .then((changed) => {
+          if (!changed || !interaction.guildId) return;
+          const store = loadStore();
+          const settings = guildSettings(store, interaction.guildId);
+          settings.panelChannelId = interaction.channelId;
+          settings.panelMessageId = interaction.message.id;
+          saveStore(store);
+        })
+        .catch(() => null);
+    }
+
     const store = loadStore();
     const settings = guildSettings(store, interaction.guildId);
     const pending = settings.pending[interaction.user.id];
@@ -428,10 +559,13 @@ async function handleApplicationsInteractionInner(interaction) {
 }
 
 module.exports = {
+  PANEL_BUTTON_LABEL,
   panelRow,
   panelPayload,
   handleApplicationsInteraction,
   guildSettings,
   loadStore,
   saveStore,
+  registerApplications,
+  refreshAllApplyPanels,
 };
